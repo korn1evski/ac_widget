@@ -284,6 +284,73 @@ const seizureSafetyManager = (function() {
   };
 })();
 
+
+let visionImpairedStyleEl = null;
+
+function applyVisionImpairedProfile(enable) {
+  if (enable) {
+    if (!visionImpairedStyleEl) {
+      visionImpairedStyleEl = document.createElement("style");
+      visionImpairedStyleEl.id = "vision-impaired-style";
+      visionImpairedStyleEl.textContent = `
+        /* Font size and readability */
+        html, body, input, button, select, textarea {
+          font-size: 18px !important;
+          line-height: 1.6 !important;
+          letter-spacing: 0.6px !important;
+        }
+
+        /* Neutral contrast boost for text only */
+        body, p, span, a, li, td, th, div {
+          color: #111 !important;
+        }
+
+        /* Background cleanup to soft white */
+        body {
+          background-color: #fafafa !important;
+        }
+
+        /* Input and form readability */
+        input, textarea, select {
+          background-color: #fff !important;
+          color: #111 !important;
+          border: 2px solid #555 !important;
+        }
+
+        /* Underline & color for links */
+        a {
+          text-decoration: underline !important;
+          color: #0645AD !important;
+        }
+
+        /* Improve focus visibility */
+        *:focus {
+          outline: 3px solid #1a73e8 !important;
+          outline-offset: 3px !important;
+        }
+
+        /* Slight darkening for headers */
+        h1, h2, h3, h4, h5, h6 {
+          color: #000 !important;
+        }
+
+        /* Avoid image brightness or saturation filters */
+        img, video, canvas {
+          filter: none !important;
+        }
+      `;
+      document.head.appendChild(visionImpairedStyleEl);
+    }
+  } else {
+    if (visionImpairedStyleEl) {
+      visionImpairedStyleEl.remove();
+      visionImpairedStyleEl = null;
+    }
+  }
+}
+
+
+
 widget.querySelectorAll(".ac-toggle").forEach((toggle) => {
   toggle.addEventListener("click", () => {
     toggle.classList.toggle("active");
@@ -293,7 +360,10 @@ widget.querySelectorAll(".ac-toggle").forEach((toggle) => {
       seizureSafetyManager.applyProtection(
         toggle.classList.contains("active")
       );
-    }
+    } else if (profileId === "vision") {
+        applyVisionImpairedProfile(toggle.classList.contains("active"));
+      }
+      
   });
 });
 
