@@ -154,7 +154,6 @@ style.textContent = `
 
 document.head.appendChild(style);
 
-// Add profiles to the list
 const profileList = widget.querySelector(".ac-profile-list");
 profiles.forEach((profile) => {
   const item = document.createElement("div");
@@ -172,7 +171,6 @@ profiles.forEach((profile) => {
   profileList.appendChild(item);
 });
 
-// Add event listeners
 button.addEventListener("click", () => {
   widget.style.right = "0";
 });
@@ -181,29 +179,123 @@ widget.querySelector("#ac-close-btn").addEventListener("click", () => {
   widget.style.right = "-420px";
 });
 
-// Toggle functionality
+const seizureSafetyManager = (function() {
+  function scanForTriggers() {
+    const triggers = {
+      flashingElements: [],
+      highContrastElements: []
+    };
+
+    const allElements = document.body.getElementsByTagName('*');
+    
+    for (let element of allElements) {
+      const computedStyle = window.getComputedStyle(element);
+      const animation = computedStyle.animation || computedStyle.webkitAnimation;
+      
+      if (animation && (animation.includes('blink') || animation.includes('flash'))) {
+        triggers.flashingElements.push(element);
+      }
+
+      const backgroundColor = computedStyle.backgroundColor;
+      const backgroundImage = computedStyle.backgroundImage;
+      
+      if (backgroundColor === 'transparent' || backgroundImage.includes('gradient')) {
+        triggers.highContrastElements.push(element);
+      }
+    }
+
+    return triggers;
+  }
+
+  const originalStyles = {
+    body: {},
+    flashingElements: [],
+    highContrastElements: []
+  };
+
+  function applyProtection(active) {
+    const detectedTriggers = scanForTriggers();
+
+    if (active) {
+      originalStyles.body.filter = document.body.style.filter;
+      
+      document.body.style.filter = 'saturate(0.5) contrast(0.8) brightness(0.9)';
+      
+      detectedTriggers.flashingElements.forEach((element, index) => {
+        originalStyles.flashingElements[index] = {
+          animation: element.style.animation,
+          transition: element.style.transition,
+          opacity: element.style.opacity
+        };
+
+        element.style.animation = 'none';
+        element.style.transition = 'opacity 0.5s ease';
+        element.style.opacity = '0.7';
+      });
+
+      detectedTriggers.highContrastElements.forEach((element, index) => {
+        originalStyles.highContrastElements[index] = {
+          backgroundColor: element.style.backgroundColor,
+          color: element.style.color
+        };
+
+        element.style.backgroundColor = '#f0f0f0';
+        element.style.color = '#333';
+      });
+
+      const overlay = document.createElement('div');
+      overlay.id = 'seizure-safe-overlay';
+      overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(240, 240, 240, 0.3);
+        pointer-events: none;
+        z-index: 9999;
+      `;
+      document.body.appendChild(overlay);
+    } else {
+      document.body.style.filter = originalStyles.body.filter || '';
+      
+      detectedTriggers.flashingElements.forEach((element, index) => {
+        const originalStyle = originalStyles.flashingElements[index] || {};
+        element.style.animation = originalStyle.animation || '';
+        element.style.transition = originalStyle.transition || '';
+        element.style.opacity = originalStyle.opacity || '1';
+      });
+
+      detectedTriggers.highContrastElements.forEach((element, index) => {
+        const originalStyle = originalStyles.highContrastElements[index] || {};
+        element.style.backgroundColor = originalStyle.backgroundColor || '';
+        element.style.color = originalStyle.color || '';
+      });
+
+      const overlay = document.getElementById('seizure-safe-overlay');
+      if (overlay) {
+        overlay.remove();
+      }
+    }
+  }
+
+  return {
+    applyProtection: applyProtection
+  };
+})();
+
 widget.querySelectorAll(".ac-toggle").forEach((toggle) => {
   toggle.addEventListener("click", () => {
     toggle.classList.toggle("active");
     const profileId = toggle.dataset.profile;
 
-    // Apply accessibility changes
     if (profileId === "seizure") {
-      document.body.style.filter = toggle.classList.contains("active")
-        ? "saturate(0.7)"
-        : "";
-    } else if (profileId === "vision") {
-      document.body.style.filter = toggle.classList.contains("active")
-        ? "contrast(1.2)"
-        : "";
-    } else if (profileId === "cognitive") {
-      document.body.style.fontSize = toggle.classList.contains("active")
-        ? "110%"
-        : "";
+      seizureSafetyManager.applyProtection(
+        toggle.classList.contains("active")
+      );
     }
   });
 });
 
-// Add elements to the page
 document.body.appendChild(button);
 document.body.appendChild(widget);
