@@ -179,6 +179,13 @@ widget.querySelector("#ac-close-btn").addEventListener("click", () => {
   widget.style.right = "-420px";
 });
 
+window.addEventListener("mousemove", (e) => {
+  if (adhdEnabled) {
+    focusLine.style.top = `${e.clientY}px`;
+  }
+});
+
+
 const seizureSafetyManager = (function() {
   function scanForTriggers() {
     const triggers = {
@@ -363,9 +370,74 @@ widget.querySelectorAll(".ac-toggle").forEach((toggle) => {
     } else if (profileId === "vision") {
         applyVisionImpairedProfile(toggle.classList.contains("active"));
       }
+      else if (profileId === "adhd") {
+        applyADHDFriendlyProfile(toggle.classList.contains("active"));
+      }
       
   });
 });
+
+let adhdOverlay = null;
+let adhdEnabled = false;
+
+function applyADHDFriendlyProfile(enable) {
+  adhdEnabled = enable;
+
+  if (enable) {
+    if (!adhdOverlay) {
+      adhdOverlay = document.createElement("div");
+      adhdOverlay.id = "adhd-overlay";
+      adhdOverlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 99998;
+        background: rgba(0, 0, 0, 0.6);
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+      `;
+      document.body.appendChild(adhdOverlay);
+    }
+
+    focusLine.style.opacity = "1";
+    adhdOverlay.style.display = "block";
+  } else {
+    if (adhdOverlay) {
+      adhdOverlay.style.display = "none";
+    }
+    focusLine.style.opacity = "0";
+  }
+}
+
+window.addEventListener("mousemove", (e) => {
+  if (adhdEnabled && adhdOverlay) {
+    const lineHeight = 90; 
+    const y = e.clientY;
+    const top = Math.max(0, y - lineHeight / 2);
+    const bottom = Math.min(window.innerHeight, y + lineHeight / 2);
+
+    adhdOverlay.style.clipPath = `polygon(0 0, 100% 0, 100% ${top}px, 0 ${top}px, 0 ${bottom}px, 100% ${bottom}px, 100% 100%, 0% 100%)`;
+    focusLine.style.top = `${y}px`;
+  }
+});
+
+const focusLine = document.createElement("div");
+focusLine.id = "adhd-focus-line";
+focusLine.style.cssText = `
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 99999;
+  transition: top 0.1s ease;
+`;
+document.body.appendChild(focusLine);
+
 
 document.body.appendChild(button);
 document.body.appendChild(widget);
