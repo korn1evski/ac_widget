@@ -1,0 +1,12 @@
+#accessibility-widget-root {
+  position: fixed;
+  z-index: 2147483647;
+  all: revert;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, sans-serif !important;
+}
+
+/* Prevent our widget from being affected by page styles */
+#accessibility-widget-root * {
+  all: revert;
+}
