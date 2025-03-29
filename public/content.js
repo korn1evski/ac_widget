@@ -46,6 +46,26 @@ widget.style.cssText = `
   background: rgba(255, 255, 255, 0.95);
 `;
 
+// Add keyboard shortcut to open widget
+document.addEventListener("keydown", (e) => {
+  // Check for Command+U (Mac) or Ctrl+U (Windows/Linux)
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "u") {
+    e.preventDefault(); // Prevent default browser behavior
+    const isOpen = widget.style.right === "0px";
+    widget.style.right = isOpen ? "-520px" : "0";
+
+    if (!isOpen) {
+      // Focus on the input field after a short delay to ensure the widget is visible
+      setTimeout(() => {
+        const searchInput = widget.querySelector(".ac-search-box input");
+        if (searchInput) {
+          searchInput.focus();
+        }
+      }, 300);
+    }
+  }
+});
+
 // Add the widget content
 widget.innerHTML = `
   <div style="background: #0D6EFD; color: white; padding: 20px;">
@@ -59,7 +79,7 @@ widget.innerHTML = `
   
   <div style="padding: 20px;">
     <div class="ac-search-box">
-      <input type="text" placeholder="Unclear content? Search in dictionary..." 
+      <input type="text" placeholder="Enter a disease to categorize..." 
              style="width: 100%; padding: 12px 20px; border-radius: 25px; border: 1px solid #e0e0e0; margin-bottom: 20px; background: #f8f9fa;">
       <span style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #6c757d;">▼</span>
     </div>
@@ -227,30 +247,37 @@ const categories = {
       title: "Vision Impaired Profile",
       description: "Enhances website's visuals",
       icon: "👁",
-      category: "sensory"
+      category: "sensory",
     },
     {
       id: "hearing",
       title: "Hearing Impaired Profile",
       description: "Audio alternatives & captions",
       icon: "👂",
-      category: "sensory"
+      category: "sensory",
     },
     {
       id: "blind",
       title: "Blind Users (Screen Reader)",
       description: "Optimized for screen readers",
       icon: "🔊",
-      category: "sensory"
+      category: "sensory",
     },
     {
       id: "colorblind",
       title: "Color Blindness Profile",
-      description: "Enhance color visibility for different color blindness types",
+      description:
+        "Enhance color visibility for different color blindness types",
       icon: "🎨",
-      category: "sensory"
-    }
-    
+      category: "sensory",
+    },
+    {
+      id: "motor",
+      title: "Motor & Mobility Profile",
+      description: "Voice commands & simplified navigation",
+      icon: "🦾",
+      category: "sensory",
+    },
   ],
   motor: [
     {
@@ -258,29 +285,22 @@ const categories = {
       title: "Keyboard Navigation",
       description: "Use website with the keyboard",
       icon: "⌨️",
-      category: "motor"
-    },
-    {
-      id: "motor",
-      title: "Motor & Mobility Profile",
-      description: "Voice commands & simplified navigation",
-      icon: "🦾",
-      category: "motor"
+      category: "motor",
     },
     {
       id: "gesture",
       title: "Gesture Control",
       description: "Custom gesture recognition",
       icon: "👆",
-      category: "motor"
+      category: "motor",
     },
     {
       id: "eyetracking",
       title: "Eye Tracking Support",
       description: "Navigate with eye movements",
       icon: "👁️",
-      category: "motor"
-    }
+      category: "motor",
+    },
   ],
   cognitive: [
     {
@@ -288,29 +308,29 @@ const categories = {
       title: "Cognitive Disability Profile",
       description: "Assists with reading & focusing",
       icon: "🎯",
-      category: "cognitive"
+      category: "cognitive",
     },
     {
       id: "simplified",
       title: "Simplified Content",
       description: "Reduces language complexity",
       icon: "📝",
-      category: "cognitive"
+      category: "cognitive",
     },
     {
       id: "memory",
       title: "Memory Support",
       description: "Highlights visited content",
       icon: "💭",
-      category: "cognitive"
+      category: "cognitive",
     },
     {
       id: "reading",
       title: "Reading Guide",
       description: "Maintains focus while reading",
       icon: "📖",
-      category: "cognitive"
-    }
+      category: "cognitive",
+    },
   ],
   neurological: [
     {
@@ -318,52 +338,52 @@ const categories = {
       title: "Seizure Safe Profile",
       description: "Clear flashes & reduces color",
       icon: "⚡",
-      category: "neurological"
+      category: "neurological",
     },
     {
       id: "adhd",
       title: "ADHD Friendly Profile",
       description: "More focus & fewer distractions",
       icon: "🔲",
-      category: "neurological"
+      category: "neurological",
     },
     {
       id: "sensory",
       title: "Sensory Overload Prevention",
       description: "Adjusts stimulation levels",
       icon: "🎨",
-      category: "neurological"
+      category: "neurological",
     },
     {
       id: "focus",
       title: "Focus Enhancement",
       description: "Highlights essential content",
       icon: "🎯",
-      category: "neurological"
-    }
-  ]
+      category: "neurological",
+    },
+  ],
 };
 
 // Flatten profiles array for rendering
 const profiles = Object.values(categories).flat();
 
 // Add category filter functionality
-const categoryButtons = widget.querySelectorAll('.ac-category-btn');
-categoryButtons.forEach(button => {
-  button.addEventListener('click', () => {
+const categoryButtons = widget.querySelectorAll(".ac-category-btn");
+categoryButtons.forEach((button) => {
+  button.addEventListener("click", () => {
     // Update active state
-    categoryButtons.forEach(btn => btn.classList.remove('active'));
-    button.classList.add('active');
-    
+    categoryButtons.forEach((btn) => btn.classList.remove("active"));
+    button.classList.add("active");
+
     // Filter profiles
     const category = button.dataset.category;
-    const profileItems = widget.querySelectorAll('.ac-profile-item');
-    
-    profileItems.forEach(item => {
-      if (category === 'all' || item.dataset.category === category) {
-        item.classList.add('visible');
+    const profileItems = widget.querySelectorAll(".ac-profile-item");
+
+    profileItems.forEach((item) => {
+      if (category === "all" || item.dataset.category === category) {
+        item.classList.add("visible");
       } else {
-        item.classList.remove('visible');
+        item.classList.remove("visible");
       }
     });
   });
@@ -432,46 +452,57 @@ profiles.forEach((profile) => {
       <div class="ac-profile-icon">${profile.icon}</div>
     `;
   }
-  
+
   profileList.appendChild(item);
 });
 
+// Add event listeners for the button and close button
 button.addEventListener("click", () => {
   widget.style.right = "0";
+  setTimeout(() => {
+    const searchInput = widget.querySelector(".ac-search-box input");
+    if (searchInput) {
+      searchInput.focus();
+    }
+  }, 300);
 });
 
 widget.querySelector("#ac-close-btn").addEventListener("click", () => {
   widget.style.right = "-520px";
 });
 
-window.addEventListener("mousemove", (e) => {
-  if (adhdEnabled) {
-    focusLine.style.top = `${e.clientY}px`;
-  }
-});
+// Append both the button and widget to the document
+document.body.appendChild(button);
+document.body.appendChild(widget);
 
-
-const seizureSafetyManager = (function() {
+const seizureSafetyManager = (function () {
   function scanForTriggers() {
     const triggers = {
       flashingElements: [],
-      highContrastElements: []
+      highContrastElements: [],
     };
 
-    const allElements = document.body.getElementsByTagName('*');
-    
+    const allElements = document.body.getElementsByTagName("*");
+
     for (let element of allElements) {
       const computedStyle = window.getComputedStyle(element);
-      const animation = computedStyle.animation || computedStyle.webkitAnimation;
-      
-      if (animation && (animation.includes('blink') || animation.includes('flash'))) {
+      const animation =
+        computedStyle.animation || computedStyle.webkitAnimation;
+
+      if (
+        animation &&
+        (animation.includes("blink") || animation.includes("flash"))
+      ) {
         triggers.flashingElements.push(element);
       }
 
       const backgroundColor = computedStyle.backgroundColor;
       const backgroundImage = computedStyle.backgroundImage;
-      
-      if (backgroundColor === 'transparent' || backgroundImage.includes('gradient')) {
+
+      if (
+        backgroundColor === "transparent" ||
+        backgroundImage.includes("gradient")
+      ) {
         triggers.highContrastElements.push(element);
       }
     }
@@ -482,7 +513,7 @@ const seizureSafetyManager = (function() {
   const originalStyles = {
     body: {},
     flashingElements: [],
-    highContrastElements: []
+    highContrastElements: [],
   };
 
   function applyProtection(active) {
@@ -490,33 +521,34 @@ const seizureSafetyManager = (function() {
 
     if (active) {
       originalStyles.body.filter = document.body.style.filter;
-      
-      document.body.style.filter = 'saturate(0.5) contrast(0.8) brightness(0.9)';
-      
+
+      document.body.style.filter =
+        "saturate(0.5) contrast(0.8) brightness(0.9)";
+
       detectedTriggers.flashingElements.forEach((element, index) => {
         originalStyles.flashingElements[index] = {
           animation: element.style.animation,
           transition: element.style.transition,
-          opacity: element.style.opacity
+          opacity: element.style.opacity,
         };
 
-        element.style.animation = 'none';
-        element.style.transition = 'opacity 0.5s ease';
-        element.style.opacity = '0.7';
+        element.style.animation = "none";
+        element.style.transition = "opacity 0.5s ease";
+        element.style.opacity = "0.7";
       });
 
       detectedTriggers.highContrastElements.forEach((element, index) => {
         originalStyles.highContrastElements[index] = {
           backgroundColor: element.style.backgroundColor,
-          color: element.style.color
+          color: element.style.color,
         };
 
-        element.style.backgroundColor = '#f0f0f0';
-        element.style.color = '#333';
+        element.style.backgroundColor = "#f0f0f0";
+        element.style.color = "#333";
       });
 
-      const overlay = document.createElement('div');
-      overlay.id = 'seizure-safe-overlay';
+      const overlay = document.createElement("div");
+      overlay.id = "seizure-safe-overlay";
       overlay.style.cssText = `
         position: fixed;
         top: 0;
@@ -529,22 +561,22 @@ const seizureSafetyManager = (function() {
       `;
       document.body.appendChild(overlay);
     } else {
-      document.body.style.filter = originalStyles.body.filter || '';
-      
+      document.body.style.filter = originalStyles.body.filter || "";
+
       detectedTriggers.flashingElements.forEach((element, index) => {
         const originalStyle = originalStyles.flashingElements[index] || {};
-        element.style.animation = originalStyle.animation || '';
-        element.style.transition = originalStyle.transition || '';
-        element.style.opacity = originalStyle.opacity || '1';
+        element.style.animation = originalStyle.animation || "";
+        element.style.transition = originalStyle.transition || "";
+        element.style.opacity = originalStyle.opacity || "1";
       });
 
       detectedTriggers.highContrastElements.forEach((element, index) => {
         const originalStyle = originalStyles.highContrastElements[index] || {};
-        element.style.backgroundColor = originalStyle.backgroundColor || '';
-        element.style.color = originalStyle.color || '';
+        element.style.backgroundColor = originalStyle.backgroundColor || "";
+        element.style.color = originalStyle.color || "";
       });
 
-      const overlay = document.getElementById('seizure-safe-overlay');
+      const overlay = document.getElementById("seizure-safe-overlay");
       if (overlay) {
         overlay.remove();
       }
@@ -552,10 +584,9 @@ const seizureSafetyManager = (function() {
   }
 
   return {
-    applyProtection: applyProtection
+    applyProtection: applyProtection,
   };
 })();
-
 
 let visionImpairedStyleEl = null;
 
@@ -621,19 +652,17 @@ function applyVisionImpairedProfile(enable) {
   }
 }
 
-
-
 widget.querySelectorAll(".ac-toggle").forEach((toggle) => {
   toggle.addEventListener("click", () => {
     toggle.classList.toggle("active");
     const profileId = toggle.dataset.profile;
 
     if (profileId === "keyboard") {
-      keyboardNavigationManager.applyProfile(toggle.classList.contains("active"));
-    } else if (profileId === "seizure") {
-      seizureSafetyManager.applyProtection(
+      keyboardNavigationManager.applyProfile(
         toggle.classList.contains("active")
       );
+    } else if (profileId === "seizure") {
+      seizureSafetyManager.applyProtection(toggle.classList.contains("active"));
     } else if (profileId === "vision") {
       applyVisionImpairedProfile(toggle.classList.contains("active"));
     } else if (profileId === "adhd") {
@@ -649,7 +678,9 @@ widget.querySelectorAll(".ac-toggle").forEach((toggle) => {
     } else if (profileId === "eyetracking") {
       eyeTrackingManager.applyProfile(toggle.classList.contains("active"));
     } else if (profileId === "simplified") {
-      simplifiedContentManager.applyProfile(toggle.classList.contains("active"));
+      simplifiedContentManager.applyProfile(
+        toggle.classList.contains("active")
+      );
     } else if (profileId === "memory") {
       memorySupportManager.applyProfile(toggle.classList.contains("active"));
     } else if (profileId === "reading") {
@@ -660,11 +691,13 @@ widget.querySelectorAll(".ac-toggle").forEach((toggle) => {
       focusEnhancementManager.applyProfile(toggle.classList.contains("active"));
     } else if (profileId === "colorblind") {
       const enabled = toggle.classList.contains("active");
-      const palette = toggle.closest(".ac-profile-item").querySelector(".cb-filter-palette");
+      const palette = toggle
+        .closest(".ac-profile-item")
+        .querySelector(".cb-filter-palette");
       if (palette) {
         palette.style.display = enabled ? "flex" : "none";
       }
-    
+
       if (!enabled) {
         applyColorBlindFilter("normal");
       }
@@ -708,7 +741,7 @@ function applyADHDFriendlyProfile(enable) {
 
 window.addEventListener("mousemove", (e) => {
   if (adhdEnabled && adhdOverlay) {
-    const lineHeight = 90; 
+    const lineHeight = 90;
     const y = e.clientY;
     const top = Math.max(0, y - lineHeight / 2);
     const bottom = Math.min(window.innerHeight, y + lineHeight / 2);
@@ -733,10 +766,6 @@ focusLine.style.cssText = `
 `;
 document.body.appendChild(focusLine);
 
-
-document.body.appendChild(button);
-document.body.appendChild(widget);
-
 const colorBlindStyles = document.createElement("style");
 colorBlindStyles.id = "color-blind-style";
 document.head.appendChild(colorBlindStyles);
@@ -745,7 +774,7 @@ const colorBlindFilters = {
   normal: "none",
   protanopia: "url('#protanopia')",
   deuteranopia: "url('#deuteranopia')",
-  tritanopia: "url('#tritanopia')"
+  tritanopia: "url('#tritanopia')",
 };
 
 // SVG filter definitions (simulate types of color blindness)
@@ -762,10 +791,10 @@ const svgFilters = `
   </filter>
 </svg>
 `;
-document.body.insertAdjacentHTML('beforeend', svgFilters);
+document.body.insertAdjacentHTML("beforeend", svgFilters);
 
 // Enhanced Hearing Impaired Manager
-const hearingImpairedManager = (function() {
+const hearingImpairedManager = (function () {
   let captionsEnabled = false;
   let visualNotificationsEnabled = false;
   let frequencyAdjustmentEnabled = false;
@@ -773,14 +802,14 @@ const hearingImpairedManager = (function() {
   let notificationContainer = null;
 
   function setupCaptions() {
-    const videoElements = document.querySelectorAll('video, audio');
-    videoElements.forEach(element => {
-      if (!element.hasAttribute('data-original-captions')) {
-        element.setAttribute('data-original-captions', element.innerHTML);
-        
+    const videoElements = document.querySelectorAll("video, audio");
+    videoElements.forEach((element) => {
+      if (!element.hasAttribute("data-original-captions")) {
+        element.setAttribute("data-original-captions", element.innerHTML);
+
         // Create caption container
-        const captionContainer = document.createElement('div');
-        captionContainer.className = 'ac-caption-container';
+        const captionContainer = document.createElement("div");
+        captionContainer.className = "ac-caption-container";
         captionContainer.style.cssText = `
           position: absolute;
           bottom: 0;
@@ -793,21 +822,21 @@ const hearingImpairedManager = (function() {
           text-align: center;
           z-index: 1000;
         `;
-        
+
         // Create caption track
-        const captionTrack = document.createElement('track');
-        captionTrack.kind = 'captions';
-        captionTrack.label = 'Auto-generated captions';
-        captionTrack.srclang = 'en';
-        
+        const captionTrack = document.createElement("track");
+        captionTrack.kind = "captions";
+        captionTrack.label = "Auto-generated captions";
+        captionTrack.srclang = "en";
+
         // Add event listeners for captions
-        element.addEventListener('timeupdate', () => {
+        element.addEventListener("timeupdate", () => {
           const currentTime = element.currentTime;
           // Simulate caption generation (in real implementation, use speech-to-text API)
           const caption = `Caption at ${Math.floor(currentTime)}s`;
           captionContainer.textContent = caption;
         });
-        
+
         element.appendChild(captionTrack);
         element.parentElement.appendChild(captionContainer);
       }
@@ -815,8 +844,8 @@ const hearingImpairedManager = (function() {
   }
 
   function setupVisualNotifications() {
-    notificationContainer = document.createElement('div');
-    notificationContainer.id = 'visual-notifications';
+    notificationContainer = document.createElement("div");
+    notificationContainer.id = "visual-notifications";
     notificationContainer.style.cssText = `
       position: fixed;
       top: 20px;
@@ -829,26 +858,26 @@ const hearingImpairedManager = (function() {
     document.body.appendChild(notificationContainer);
 
     // Listen for audio events
-    document.addEventListener('play', (e) => {
-      if (e.target.tagName === 'AUDIO' || e.target.tagName === 'VIDEO') {
-        showNotification('🎵 Audio playing', 'info');
+    document.addEventListener("play", (e) => {
+      if (e.target.tagName === "AUDIO" || e.target.tagName === "VIDEO") {
+        showNotification("🎵 Audio playing", "info");
       }
     });
 
-    document.addEventListener('pause', (e) => {
-      if (e.target.tagName === 'AUDIO' || e.target.tagName === 'VIDEO') {
-        showNotification('⏸️ Audio paused', 'info');
+    document.addEventListener("pause", (e) => {
+      if (e.target.tagName === "AUDIO" || e.target.tagName === "VIDEO") {
+        showNotification("⏸️ Audio paused", "info");
       }
     });
   }
 
-  function showNotification(message, type = 'info') {
+  function showNotification(message, type = "info") {
     if (!notificationContainer) return;
-    
-    const notification = document.createElement('div');
+
+    const notification = document.createElement("div");
     notification.className = `ac-notification ${type}`;
     notification.style.cssText = `
-      background: ${type === 'info' ? '#4169E1' : '#dc3545'};
+      background: ${type === "info" ? "#4169E1" : "#dc3545"};
       color: white;
       padding: 12px 20px;
       border-radius: 8px;
@@ -856,29 +885,30 @@ const hearingImpairedManager = (function() {
       animation: slideIn 0.3s ease;
     `;
     notification.textContent = message;
-    
+
     notificationContainer.appendChild(notification);
-    
+
     setTimeout(() => {
-      notification.style.animation = 'slideOut 0.3s ease';
+      notification.style.animation = "slideOut 0.3s ease";
       setTimeout(() => notification.remove(), 300);
     }, 3000);
   }
 
   function setupFrequencyAdjustment() {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const mediaElements = document.querySelectorAll('audio, video');
-    
-    mediaElements.forEach(element => {
+    const audioContext = new (window.AudioContext ||
+      window.webkitAudioContext)();
+    const mediaElements = document.querySelectorAll("audio, video");
+
+    mediaElements.forEach((element) => {
       const source = audioContext.createMediaElementSource(element);
       const gainNode = audioContext.createGain();
       const filterNode = audioContext.createBiquadFilter();
-      
+
       // Adjust frequency response for better hearing
-      filterNode.type = 'highshelf';
+      filterNode.type = "highshelf";
       filterNode.frequency.value = 1000;
       filterNode.gain.value = 10;
-      
+
       source.connect(filterNode);
       filterNode.connect(gainNode);
       gainNode.connect(audioContext.destination);
@@ -895,23 +925,25 @@ const hearingImpairedManager = (function() {
       frequencyAdjustmentEnabled = true;
     } else {
       // Cleanup
-      const videoElements = document.querySelectorAll('video, audio');
-      videoElements.forEach(element => {
-        const originalCaptions = element.getAttribute('data-original-captions');
+      const videoElements = document.querySelectorAll("video, audio");
+      videoElements.forEach((element) => {
+        const originalCaptions = element.getAttribute("data-original-captions");
         if (originalCaptions) {
           element.innerHTML = originalCaptions;
         }
-        const captionContainer = element.parentElement.querySelector('.ac-caption-container');
+        const captionContainer = element.parentElement.querySelector(
+          ".ac-caption-container"
+        );
         if (captionContainer) {
           captionContainer.remove();
         }
       });
-      
+
       if (notificationContainer) {
         notificationContainer.remove();
         notificationContainer = null;
       }
-      
+
       captionsEnabled = false;
       visualNotificationsEnabled = false;
       frequencyAdjustmentEnabled = false;
@@ -919,12 +951,12 @@ const hearingImpairedManager = (function() {
   }
 
   return {
-    applyProfile: applyHearingImpairedProfile
+    applyProfile: applyHearingImpairedProfile,
   };
 })();
 
 // Enhanced Motor & Mobility Manager with AI Voice Control
-const motorMobilityManager = (function() {
+const motorMobilityManager = (function () {
   let voiceCommandsEnabled = false;
   let simplifiedNavigationEnabled = false;
   let gestureRecognitionEnabled = false;
@@ -943,47 +975,55 @@ const motorMobilityManager = (function() {
     navigate: /go to (?:the )?([^\.]+)/i,
     zoom: /zoom (?:in|out)/i,
     stop: /stop (?:listening|voice)/i,
-    help: /help|what can you do/i
+    help: /help|what can you do/i,
   };
 
   function setupVoiceCommands() {
-    if ('webkitSpeechRecognition' in window) {
+    if ("webkitSpeechRecognition" in window) {
       recognition = new webkitSpeechRecognition();
       recognition.continuous = true;
       recognition.interimResults = false; // Changed to false to prevent duplicate results
-      recognition.lang = 'en-US';
-      
-      recognition.onresult = function(event) {
-        const command = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
+      recognition.lang = "en-US";
+
+      recognition.onresult = function (event) {
+        const command = event.results[event.results.length - 1][0].transcript
+          .toLowerCase()
+          .trim();
         handleVoiceCommand(command);
       };
 
-      recognition.onerror = function(event) {
-        console.error('Speech recognition error:', event.error);
-        if (event.error === 'aborted') {
+      recognition.onerror = function (event) {
+        console.error("Speech recognition error:", event.error);
+        if (event.error === "aborted") {
           // Restart recognition if it was aborted
           setTimeout(() => {
             if (isListening) {
               try {
                 recognition.start();
               } catch (e) {
-                console.error('Failed to restart recognition:', e);
-                showVoiceFeedback('Voice recognition error. Please try again.', 'error');
+                console.error("Failed to restart recognition:", e);
+                showVoiceFeedback(
+                  "Voice recognition error. Please try again.",
+                  "error"
+                );
               }
             }
           }, 1000);
         } else {
-          showVoiceFeedback('Voice recognition error: ' + event.error, 'error');
+          showVoiceFeedback("Voice recognition error: " + event.error, "error");
         }
       };
 
-      recognition.onend = function() {
+      recognition.onend = function () {
         if (isListening) {
           try {
             recognition.start();
           } catch (e) {
-            console.error('Failed to restart recognition:', e);
-            showVoiceFeedback('Voice recognition error. Please try again.', 'error');
+            console.error("Failed to restart recognition:", e);
+            showVoiceFeedback(
+              "Voice recognition error. Please try again.",
+              "error"
+            );
           }
         }
       };
@@ -991,32 +1031,41 @@ const motorMobilityManager = (function() {
       try {
         recognition.start();
         isListening = true;
-        showVoiceFeedback('Voice control activated. Say "help" for available commands.', 'info');
+        showVoiceFeedback(
+          'Voice control activated. Say "help" for available commands.',
+          "info"
+        );
       } catch (e) {
-        console.error('Failed to start recognition:', e);
-        showVoiceFeedback('Failed to start voice recognition. Please try again.', 'error');
+        console.error("Failed to start recognition:", e);
+        showVoiceFeedback(
+          "Failed to start voice recognition. Please try again.",
+          "error"
+        );
       }
     } else {
-      showVoiceFeedback('Voice recognition is not supported in your browser.', 'error');
+      showVoiceFeedback(
+        "Voice recognition is not supported in your browser.",
+        "error"
+      );
     }
   }
 
-  function showVoiceFeedback(message, type = 'info') {
+  function showVoiceFeedback(message, type = "info") {
     // Remove any existing feedback
-    const existingFeedback = document.querySelector('.ac-voice-feedback');
+    const existingFeedback = document.querySelector(".ac-voice-feedback");
     if (existingFeedback) {
       existingFeedback.remove();
     }
 
     // Create visual feedback
-    const feedback = document.createElement('div');
-    feedback.className = 'ac-voice-feedback';
+    const feedback = document.createElement("div");
+    feedback.className = "ac-voice-feedback";
     feedback.style.cssText = `
       position: fixed;
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      background: ${type === 'info' ? '#4169E1' : '#dc3545'};
+      background: ${type === "info" ? "#4169E1" : "#dc3545"};
       color: white;
       padding: 12px 24px;
       border-radius: 25px;
@@ -1027,27 +1076,27 @@ const motorMobilityManager = (function() {
     `;
     feedback.textContent = message;
     document.body.appendChild(feedback);
-    
+
     // Stop any ongoing speech
     window.speechSynthesis.cancel();
-    
+
     // Add speech synthesis
     const utterance = new SpeechSynthesisUtterance(message);
-    utterance.lang = 'en-US';
+    utterance.lang = "en-US";
     utterance.rate = 0.9;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
-    
+
     // Speak the message
     try {
       window.speechSynthesis.speak(utterance);
     } catch (e) {
-      console.error('Speech synthesis error:', e);
+      console.error("Speech synthesis error:", e);
     }
-    
+
     // Remove visual feedback after delay
     setTimeout(() => {
-      feedback.style.animation = 'slideDown 0.3s ease';
+      feedback.style.animation = "slideDown 0.3s ease";
       setTimeout(() => feedback.remove(), 300);
     }, 3000);
   }
@@ -1067,7 +1116,7 @@ const motorMobilityManager = (function() {
         - Zoom in/out
         - Stop listening
       `;
-      showVoiceFeedback(helpMessage, 'info');
+      showVoiceFeedback(helpMessage, "info");
       return;
     }
 
@@ -1075,7 +1124,7 @@ const motorMobilityManager = (function() {
     if (commandPatterns.stop.test(command)) {
       isListening = false;
       recognition.stop();
-      showVoiceFeedback('Voice control deactivated', 'info');
+      showVoiceFeedback("Voice control deactivated", "info");
       return;
     }
 
@@ -1083,17 +1132,25 @@ const motorMobilityManager = (function() {
     const clickMatch = command.match(commandPatterns.click);
     if (clickMatch) {
       const targetText = clickMatch[1].trim();
-      const elements = Array.from(document.querySelectorAll('button, a, input[type="submit"], [role="button"]'));
-      const targetElement = elements.find(el => 
-        el.textContent.toLowerCase().includes(targetText) ||
-        el.getAttribute('aria-label')?.toLowerCase().includes(targetText)
+      const elements = Array.from(
+        document.querySelectorAll(
+          'button, a, input[type="submit"], [role="button"]'
+        )
       );
-      
+      const targetElement = elements.find(
+        (el) =>
+          el.textContent.toLowerCase().includes(targetText) ||
+          el.getAttribute("aria-label")?.toLowerCase().includes(targetText)
+      );
+
       if (targetElement) {
         targetElement.click();
-        showVoiceFeedback(`Clicked: ${targetElement.textContent.trim()}`, 'info');
+        showVoiceFeedback(
+          `Clicked: ${targetElement.textContent.trim()}`,
+          "info"
+        );
       } else {
-        showVoiceFeedback(`Could not find element: ${targetText}`, 'error');
+        showVoiceFeedback(`Could not find element: ${targetText}`, "error");
       }
       return;
     }
@@ -1102,26 +1159,26 @@ const motorMobilityManager = (function() {
     const scrollMatch = command.match(commandPatterns.scroll);
     if (scrollMatch) {
       const direction = scrollMatch[1];
-      let feedbackMessage = '';
-      switch(direction) {
-        case 'up':
+      let feedbackMessage = "";
+      switch (direction) {
+        case "up":
           window.scrollBy(0, -100);
-          feedbackMessage = 'Scrolled up';
+          feedbackMessage = "Scrolled up";
           break;
-        case 'down':
+        case "down":
           window.scrollBy(0, 100);
-          feedbackMessage = 'Scrolled down';
+          feedbackMessage = "Scrolled down";
           break;
-        case 'top':
+        case "top":
           window.scrollTo(0, 0);
-          feedbackMessage = 'Scrolled to top';
+          feedbackMessage = "Scrolled to top";
           break;
-        case 'bottom':
+        case "bottom":
           window.scrollTo(0, document.body.scrollHeight);
-          feedbackMessage = 'Scrolled to bottom';
+          feedbackMessage = "Scrolled to bottom";
           break;
       }
-      showVoiceFeedback(feedbackMessage, 'info');
+      showVoiceFeedback(feedbackMessage, "info");
       return;
     }
 
@@ -1132,10 +1189,10 @@ const motorMobilityManager = (function() {
       const searchInput = document.querySelector('input[type="search"]');
       if (searchInput) {
         searchInput.value = searchTerm;
-        searchInput.dispatchEvent(new Event('input'));
-        showVoiceFeedback(`Searching for: ${searchTerm}`, 'info');
+        searchInput.dispatchEvent(new Event("input"));
+        showVoiceFeedback(`Searching for: ${searchTerm}`, "info");
       } else {
-        showVoiceFeedback('Search input not found', 'error');
+        showVoiceFeedback("Search input not found", "error");
       }
       return;
     }
@@ -1144,16 +1201,18 @@ const motorMobilityManager = (function() {
     const readMatch = command.match(commandPatterns.read);
     if (readMatch) {
       const targetText = readMatch[1].trim();
-      const elements = Array.from(document.querySelectorAll('p, h1, h2, h3, h4, h5, h6, article, section'));
-      const targetElement = elements.find(el => 
+      const elements = Array.from(
+        document.querySelectorAll("p, h1, h2, h3, h4, h5, h6, article, section")
+      );
+      const targetElement = elements.find((el) =>
         el.textContent.toLowerCase().includes(targetText)
       );
-      
+
       if (targetElement) {
         const text = targetElement.textContent.trim();
-        showVoiceFeedback(`Reading: ${text}`, 'info');
+        showVoiceFeedback(`Reading: ${text}`, "info");
       } else {
-        showVoiceFeedback(`Could not find text: ${targetText}`, 'error');
+        showVoiceFeedback(`Could not find text: ${targetText}`, "error");
       }
       return;
     }
@@ -1161,8 +1220,8 @@ const motorMobilityManager = (function() {
     // Handle describe command
     if (commandPatterns.describe.test(command)) {
       try {
-        showVoiceFeedback('Analyzing content...', 'info');
-        
+        showVoiceFeedback("Analyzing content...", "info");
+
         // Add delay before processing
         setTimeout(async () => {
           // Get only the visible content
@@ -1171,55 +1230,64 @@ const motorMobilityManager = (function() {
             window.innerWidth / 2,
             window.innerHeight / 2
           );
-          
+
           // Get the main content element
-          const mainContent = elements.find(el => 
-            el.tagName === 'MAIN' || 
-            el.getAttribute('role') === 'main' ||
-            el.id === 'main-content'
-          ) || document.body;
+          const mainContent =
+            elements.find(
+              (el) =>
+                el.tagName === "MAIN" ||
+                el.getAttribute("role") === "main" ||
+                el.id === "main-content"
+            ) || document.body;
 
           // Get visible text content
           const textContent = mainContent.innerText
-            .split('\n')
-            .map(line => line.trim())
-            .filter(line => line.length > 0)
-            .join('\n')
+            .split("\n")
+            .map((line) => line.trim())
+            .filter((line) => line.length > 0)
+            .join("\n")
             .substring(0, 1000); // Limit to first 1000 characters
 
           // Call OpenAI API for description
-          const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer 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'
-            },
-            body: JSON.stringify({
-              model: 'gpt-3.5-turbo',
-              messages: [{
-                role: 'user',
-                content: `Provide a brief, clear description of what this section of the webpage is about in 50 words or less. Focus on the main purpose and content: ${textContent}`
-              }]
-            })
-          });
+          const response = await fetch(
+            "https://api.openai.com/v1/chat/completions",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization:
+                  "Bearer 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",
+              },
+              body: JSON.stringify({
+                model: "gpt-3.5-turbo",
+                messages: [
+                  {
+                    role: "user",
+                    content: `Provide a brief, clear description of what this section of the webpage is about in 50 words or less. Focus on the main purpose and content: ${textContent}`,
+                  },
+                ],
+              }),
+            }
+          );
           const data = await response.json();
           const description = data.choices[0].message.content;
-          showVoiceFeedback(`Description: ${description}`, 'info');
+          showVoiceFeedback(`Description: ${description}`, "info");
         }, 1000); // 1 second delay
       } catch (error) {
-        showVoiceFeedback('Error generating description', 'error');
+        showVoiceFeedback("Error generating description", "error");
       }
       return;
     }
 
     // Handle describe image command
     if (commandPatterns.describeImage.test(command)) {
-      showVoiceFeedback('Analyzing image...', 'info');
-      
+      showVoiceFeedback("Analyzing image...", "info");
+
       // Add delay before presenting the description
       setTimeout(() => {
-        const description = "A mother and child sleep peacefully in bed, the mother embracing the child protectively. The child holds a teddy bear, adding warmth to the cozy, dimly lit nighttime scene.";
-        showVoiceFeedback(`Description: ${description}`, 'info');
+        const description =
+          "A mother and child sleep peacefully in bed, the mother embracing the child protectively. The child holds a teddy bear, adding warmth to the cozy, dimly lit nighttime scene.";
+        showVoiceFeedback(`Description: ${description}`, "info");
       }, 1000); // 1 second delay
       return;
     }
@@ -1228,16 +1296,18 @@ const motorMobilityManager = (function() {
     const navigateMatch = command.match(commandPatterns.navigate);
     if (navigateMatch) {
       const targetSection = navigateMatch[1].trim();
-      const sections = Array.from(document.querySelectorAll('section, article, [role="region"]'));
-      const targetElement = sections.find(section => 
+      const sections = Array.from(
+        document.querySelectorAll('section, article, [role="region"]')
+      );
+      const targetElement = sections.find((section) =>
         section.textContent.toLowerCase().includes(targetSection)
       );
-      
+
       if (targetElement) {
-        targetElement.scrollIntoView({ behavior: 'smooth' });
-        showVoiceFeedback(`Navigated to: ${targetSection}`, 'info');
+        targetElement.scrollIntoView({ behavior: "smooth" });
+        showVoiceFeedback(`Navigated to: ${targetSection}`, "info");
       } else {
-        showVoiceFeedback(`Could not find section: ${targetSection}`, 'error');
+        showVoiceFeedback(`Could not find section: ${targetSection}`, "error");
       }
       return;
     }
@@ -1246,51 +1316,58 @@ const motorMobilityManager = (function() {
     const zoomMatch = command.match(commandPatterns.zoom);
     if (zoomMatch) {
       const direction = zoomMatch[1];
-      const currentZoom = parseFloat(document.body.style.transform.replace('scale(', '').replace(')', '')) || 1;
-      const newZoom = direction === 'in' ? currentZoom + 0.1 : currentZoom - 0.1;
-      
+      const currentZoom =
+        parseFloat(
+          document.body.style.transform.replace("scale(", "").replace(")", "")
+        ) || 1;
+      const newZoom =
+        direction === "in" ? currentZoom + 0.1 : currentZoom - 0.1;
+
       document.body.style.transform = `scale(${newZoom})`;
-      document.body.style.transformOrigin = 'center center';
-      showVoiceFeedback(`Zoomed ${direction}`, 'info');
+      document.body.style.transformOrigin = "center center";
+      showVoiceFeedback(`Zoomed ${direction}`, "info");
       return;
     }
 
     // If no command matches, show help
-    showVoiceFeedback('Command not recognized. Say "help" for available commands.', 'error');
+    showVoiceFeedback(
+      'Command not recognized. Say "help" for available commands.',
+      "error"
+    );
   }
 
   function setupSimplifiedNavigation() {
     // Add keyboard shortcuts
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener("keydown", (e) => {
       if (!simplifiedNavigationEnabled) return;
-      
-      switch(e.key) {
-        case 'h':
+
+      switch (e.key) {
+        case "h":
           window.history.back();
           break;
-        case 'l':
+        case "l":
           window.history.forward();
           break;
-        case 'j':
+        case "j":
           window.scrollBy(0, 100);
           break;
-        case 'k':
+        case "k":
           window.scrollBy(0, -100);
           break;
-        case 'g':
+        case "g":
           window.scrollTo(0, 0);
           break;
-        case 'G':
+        case "G":
           window.scrollTo(0, document.body.scrollHeight);
           break;
       }
     });
 
     // Add skip links
-    const skipLink = document.createElement('a');
-    skipLink.href = '#main-content';
-    skipLink.className = 'ac-skip-link';
-    skipLink.textContent = 'Skip to main content';
+    const skipLink = document.createElement("a");
+    skipLink.href = "#main-content";
+    skipLink.className = "ac-skip-link";
+    skipLink.textContent = "Skip to main content";
     skipLink.style.cssText = `
       position: absolute;
       top: -40px;
@@ -1335,7 +1412,7 @@ const motorMobilityManager = (function() {
       if (Math.abs(deltaY) > 100 && Math.abs(deltaX) > 100 && deltaTime < 500) {
         const zoom = deltaY > 0 ? 1.1 : 0.9;
         document.body.style.transform = `scale(${zoom})`;
-        document.body.style.transformOrigin = 'center center';
+        document.body.style.transformOrigin = "center center";
       }
 
       // Reset gesture tracking
@@ -1344,13 +1421,13 @@ const motorMobilityManager = (function() {
       startTime = Date.now();
     }
 
-    document.addEventListener('mousedown', (e) => {
+    document.addEventListener("mousedown", (e) => {
       startX = e.clientX;
       startY = e.clientY;
       startTime = Date.now();
     });
 
-    document.addEventListener('mousemove', handleGesture);
+    document.addEventListener("mousemove", handleGesture);
   }
 
   function applyMotorMobilityProfile(enable) {
@@ -1365,7 +1442,7 @@ const motorMobilityManager = (function() {
       if (recognition) {
         recognition.stop();
       }
-      const skipLink = document.querySelector('.ac-skip-link');
+      const skipLink = document.querySelector(".ac-skip-link");
       if (skipLink) {
         skipLink.remove();
       }
@@ -1376,12 +1453,12 @@ const motorMobilityManager = (function() {
   }
 
   return {
-    applyProfile: applyMotorMobilityProfile
+    applyProfile: applyMotorMobilityProfile,
   };
 })();
 
 // Enhanced Cognitive Profile Manager
-const cognitiveManager = (function() {
+const cognitiveManager = (function () {
   let cognitiveEnabled = false;
   let simplifiedEnabled = false;
   let memoryEnabled = false;
@@ -1389,8 +1466,8 @@ const cognitiveManager = (function() {
   const visitedElements = new Set();
 
   function setupCognitiveProfile() {
-    const style = document.createElement('style');
-    style.id = 'cognitive-profile-style';
+    const style = document.createElement("style");
+    style.id = "cognitive-profile-style";
     style.textContent = `
       /* Improve readability */
       body {
@@ -1433,8 +1510,8 @@ const cognitiveManager = (function() {
   }
 
   function setupMemorySupport() {
-    const style = document.createElement('style');
-    style.id = 'memory-support-style';
+    const style = document.createElement("style");
+    style.id = "memory-support-style";
     style.textContent = `
       .visited-content {
         background-color: #e3f2fd !important;
@@ -1450,18 +1527,18 @@ const cognitiveManager = (function() {
     document.head.appendChild(style);
 
     // Track visited content
-    document.addEventListener('click', (e) => {
-      const target = e.target.closest('article, section, div');
+    document.addEventListener("click", (e) => {
+      const target = e.target.closest("article, section, div");
       if (target && !visitedElements.has(target)) {
         visitedElements.add(target);
-        target.classList.add('visited-content');
+        target.classList.add("visited-content");
       }
     });
   }
 
   function setupReadingGuide() {
-    const guideElement = document.createElement('div');
-    guideElement.id = 'reading-guide';
+    const guideElement = document.createElement("div");
+    guideElement.id = "reading-guide";
     guideElement.style.cssText = `
       position: fixed;
       top: 0;
@@ -1480,11 +1557,11 @@ const cognitiveManager = (function() {
     function updateGuidePosition(e) {
       if (readingEnabled) {
         guideElement.style.top = `${e.clientY}px`;
-        guideElement.style.opacity = '1';
+        guideElement.style.opacity = "1";
       }
     }
 
-    document.addEventListener('mousemove', updateGuidePosition);
+    document.addEventListener("mousemove", updateGuidePosition);
   }
 
   function applyCognitiveProfile(enable) {
@@ -1497,19 +1574,19 @@ const cognitiveManager = (function() {
       readingEnabled = true;
     } else {
       const styles = [
-        document.getElementById('cognitive-profile-style'),
-        document.getElementById('memory-support-style')
+        document.getElementById("cognitive-profile-style"),
+        document.getElementById("memory-support-style"),
       ];
-      styles.forEach(style => {
+      styles.forEach((style) => {
         if (style) style.remove();
       });
 
-      document.querySelectorAll('.visited-content').forEach(el => {
-        el.classList.remove('visited-content');
+      document.querySelectorAll(".visited-content").forEach((el) => {
+        el.classList.remove("visited-content");
       });
       visitedElements.clear();
 
-      const guideElement = document.getElementById('reading-guide');
+      const guideElement = document.getElementById("reading-guide");
       if (guideElement) {
         guideElement.remove();
       }
@@ -1521,20 +1598,20 @@ const cognitiveManager = (function() {
   }
 
   return {
-    applyProfile: applyCognitiveProfile
+    applyProfile: applyCognitiveProfile,
   };
 })();
 
 // Enhanced Neurological Manager
-const neurologicalManager = (function() {
+const neurologicalManager = (function () {
   let sensoryEnabled = false;
   let focusEnabled = false;
   let seizureEnabled = false;
   let adhdEnabled = false;
 
   function setupSensoryAdjustments() {
-    const style = document.createElement('style');
-    style.id = 'neurological-sensory-style';
+    const style = document.createElement("style");
+    style.id = "neurological-sensory-style";
     style.textContent = `
       /* Reduce motion */
       * {
@@ -1573,8 +1650,8 @@ const neurologicalManager = (function() {
   }
 
   function setupFocusEnhancement() {
-    const style = document.createElement('style');
-    style.id = 'neurological-focus-style';
+    const style = document.createElement("style");
+    style.id = "neurological-focus-style";
     style.textContent = `
       /* Dim non-essential content */
       body > *:not(:hover) {
@@ -1604,8 +1681,8 @@ const neurologicalManager = (function() {
   }
 
   function setupSeizureSafety() {
-    const style = document.createElement('style');
-    style.id = 'neurological-seizure-style';
+    const style = document.createElement("style");
+    style.id = "neurological-seizure-style";
     style.textContent = `
       /* Remove flashing content */
       * {
@@ -1633,8 +1710,8 @@ const neurologicalManager = (function() {
   }
 
   function setupADHDFriendly() {
-    const style = document.createElement('style');
-    style.id = 'neurological-adhd-style';
+    const style = document.createElement("style");
+    style.id = "neurological-adhd-style";
     style.textContent = `
       /* Reduce distractions */
       .ad, .popup, .modal {
@@ -1673,17 +1750,17 @@ const neurologicalManager = (function() {
     document.head.appendChild(style);
 
     // Create focus line
-    const focusLine = document.createElement('div');
-    focusLine.id = 'adhd-focus-line';
+    const focusLine = document.createElement("div");
+    focusLine.id = "adhd-focus-line";
     document.body.appendChild(focusLine);
 
     // Create overlay
-    const overlay = document.createElement('div');
-    overlay.id = 'adhd-overlay';
+    const overlay = document.createElement("div");
+    overlay.id = "adhd-overlay";
     document.body.appendChild(overlay);
 
     // Update focus line position
-    window.addEventListener('mousemove', (e) => {
+    window.addEventListener("mousemove", (e) => {
       if (adhdEnabled) {
         const lineHeight = 90;
         const y = e.clientY;
@@ -1709,18 +1786,18 @@ const neurologicalManager = (function() {
     } else {
       // Cleanup styles
       const styles = [
-        document.getElementById('neurological-sensory-style'),
-        document.getElementById('neurological-focus-style'),
-        document.getElementById('neurological-seizure-style'),
-        document.getElementById('neurological-adhd-style')
+        document.getElementById("neurological-sensory-style"),
+        document.getElementById("neurological-focus-style"),
+        document.getElementById("neurological-seizure-style"),
+        document.getElementById("neurological-adhd-style"),
       ];
-      styles.forEach(style => {
+      styles.forEach((style) => {
         if (style) style.remove();
       });
 
       // Remove focus line and overlay
-      const focusLine = document.getElementById('adhd-focus-line');
-      const overlay = document.getElementById('adhd-overlay');
+      const focusLine = document.getElementById("adhd-focus-line");
+      const overlay = document.getElementById("adhd-overlay");
       if (focusLine) focusLine.remove();
       if (overlay) overlay.remove();
 
@@ -1732,12 +1809,12 @@ const neurologicalManager = (function() {
   }
 
   return {
-    applyProfile: applyNeurologicalProfile
+    applyProfile: applyNeurologicalProfile,
   };
 })();
 
 // Enhanced Gesture Control Manager
-const gestureControlManager = (function() {
+const gestureControlManager = (function () {
   let gestureEnabled = false;
   let startX = 0;
   let startY = 0;
@@ -1770,7 +1847,7 @@ const gestureControlManager = (function() {
     if (Math.abs(deltaY) > 100 && Math.abs(deltaX) > 100 && deltaTime < 500) {
       const zoom = deltaY > 0 ? 1.1 : 0.9;
       document.body.style.transform = `scale(${zoom})`;
-      document.body.style.transformOrigin = 'center center';
+      document.body.style.transformOrigin = "center center";
     }
 
     // Reset gesture tracking
@@ -1782,36 +1859,37 @@ const gestureControlManager = (function() {
   function applyGestureControl(enable) {
     gestureEnabled = enable;
     if (enable) {
-      document.addEventListener('mousedown', (e) => {
+      document.addEventListener("mousedown", (e) => {
         startX = e.clientX;
         startY = e.clientY;
         startTime = Date.now();
       });
-      document.addEventListener('mousemove', handleGesture);
+      document.addEventListener("mousemove", handleGesture);
     } else {
-      document.removeEventListener('mousemove', handleGesture);
-      document.body.style.transform = '';
-      document.body.style.transformOrigin = '';
+      document.removeEventListener("mousemove", handleGesture);
+      document.body.style.transform = "";
+      document.body.style.transformOrigin = "";
     }
   }
 
   return {
-    applyProfile: applyGestureControl
+    applyProfile: applyGestureControl,
   };
 })();
 
 // Enhanced Eye Tracking Manager
-const eyeTrackingManager = (function() {
+const eyeTrackingManager = (function () {
   let eyeTrackingEnabled = false;
   let videoElement = null;
   let stream = null;
 
   function setupEyeTracking() {
-    if ('mediaDevices' in navigator) {
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
-        .then(mediaStream => {
+    if ("mediaDevices" in navigator) {
+      navigator.mediaDevices
+        .getUserMedia({ video: { facingMode: "user" } })
+        .then((mediaStream) => {
           stream = mediaStream;
-          videoElement = document.createElement('video');
+          videoElement = document.createElement("video");
           videoElement.style.cssText = `
             position: fixed;
             bottom: 20px;
@@ -1827,16 +1905,16 @@ const eyeTrackingManager = (function() {
           document.body.appendChild(videoElement);
 
           // Basic eye tracking simulation
-          videoElement.addEventListener('timeupdate', () => {
+          videoElement.addEventListener("timeupdate", () => {
             if (eyeTrackingEnabled) {
               // Simulate eye tracking (in real implementation, use eye tracking API)
               const rect = videoElement.getBoundingClientRect();
               const centerX = rect.left + rect.width / 2;
               const centerY = rect.top + rect.height / 2;
-              
+
               // Move focus based on eye position
               const elements = document.elementsFromPoint(centerX, centerY);
-              elements.forEach(element => {
+              elements.forEach((element) => {
                 if (element !== videoElement) {
                   element.focus();
                 }
@@ -1844,7 +1922,7 @@ const eyeTrackingManager = (function() {
             }
           });
         })
-        .catch(err => console.log('Eye tracking not available:', err));
+        .catch((err) => console.log("Eye tracking not available:", err));
     }
   }
 
@@ -1858,23 +1936,23 @@ const eyeTrackingManager = (function() {
         videoElement = null;
       }
       if (stream) {
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach((track) => track.stop());
         stream = null;
       }
     }
   }
 
   return {
-    applyProfile: applyEyeTracking
+    applyProfile: applyEyeTracking,
   };
 })();
 
-const simplifiedContentManager = (function() {
+const simplifiedContentManager = (function () {
   let simplifiedEnabled = false;
 
   function simplifyContent() {
-    const style = document.createElement('style');
-    style.id = 'simplified-content-style';
+    const style = document.createElement("style");
+    style.id = "simplified-content-style";
     style.textContent = `
       /* Simplify text content */
       p, span, div {
@@ -1912,7 +1990,7 @@ const simplifiedContentManager = (function() {
     if (enable) {
       simplifyContent();
     } else {
-      const style = document.getElementById('simplified-content-style');
+      const style = document.getElementById("simplified-content-style");
       if (style) {
         style.remove();
       }
@@ -1920,17 +1998,17 @@ const simplifiedContentManager = (function() {
   }
 
   return {
-    applyProfile: applySimplifiedContent
+    applyProfile: applySimplifiedContent,
   };
 })();
 
-const memorySupportManager = (function() {
+const memorySupportManager = (function () {
   let memoryEnabled = false;
   const visitedElements = new Set();
 
   function highlightVisitedContent() {
-    const style = document.createElement('style');
-    style.id = 'memory-support-style';
+    const style = document.createElement("style");
+    style.id = "memory-support-style";
     style.textContent = `
       .visited-content {
         background-color: #e3f2fd !important;
@@ -1941,11 +2019,11 @@ const memorySupportManager = (function() {
     document.head.appendChild(style);
 
     // Track visited content
-    document.addEventListener('click', (e) => {
-      const target = e.target.closest('article, section, div');
+    document.addEventListener("click", (e) => {
+      const target = e.target.closest("article, section, div");
       if (target && !visitedElements.has(target)) {
         visitedElements.add(target);
-        target.classList.add('visited-content');
+        target.classList.add("visited-content");
       }
     });
   }
@@ -1955,29 +2033,29 @@ const memorySupportManager = (function() {
     if (enable) {
       highlightVisitedContent();
     } else {
-      const style = document.getElementById('memory-support-style');
+      const style = document.getElementById("memory-support-style");
       if (style) {
         style.remove();
       }
-      document.querySelectorAll('.visited-content').forEach(el => {
-        el.classList.remove('visited-content');
+      document.querySelectorAll(".visited-content").forEach((el) => {
+        el.classList.remove("visited-content");
       });
       visitedElements.clear();
     }
   }
 
   return {
-    applyProfile: applyMemorySupport
+    applyProfile: applyMemorySupport,
   };
 })();
 
-const readingGuideManager = (function() {
+const readingGuideManager = (function () {
   let guideEnabled = false;
   let guideElement = null;
 
   function createReadingGuide() {
-    guideElement = document.createElement('div');
-    guideElement.id = 'reading-guide';
+    guideElement = document.createElement("div");
+    guideElement.id = "reading-guide";
     guideElement.style.cssText = `
       position: fixed;
       top: 0;
@@ -1996,7 +2074,7 @@ const readingGuideManager = (function() {
   function updateGuidePosition(e) {
     if (guideEnabled && guideElement) {
       guideElement.style.top = `${e.clientY}px`;
-      guideElement.style.opacity = '1';
+      guideElement.style.opacity = "1";
     }
   }
 
@@ -2006,26 +2084,26 @@ const readingGuideManager = (function() {
       if (!guideElement) {
         createReadingGuide();
       }
-      document.addEventListener('mousemove', updateGuidePosition);
+      document.addEventListener("mousemove", updateGuidePosition);
     } else {
       if (guideElement) {
-        guideElement.style.opacity = '0';
+        guideElement.style.opacity = "0";
       }
-      document.removeEventListener('mousemove', updateGuidePosition);
+      document.removeEventListener("mousemove", updateGuidePosition);
     }
   }
 
   return {
-    applyProfile: applyReadingGuide
+    applyProfile: applyReadingGuide,
   };
 })();
 
-const sensoryOverloadManager = (function() {
+const sensoryOverloadManager = (function () {
   let sensoryEnabled = false;
 
   function applySensoryAdjustments() {
-    const style = document.createElement('style');
-    style.id = 'sensory-overload-style';
+    const style = document.createElement("style");
+    style.id = "sensory-overload-style";
     style.textContent = `
       /* Reduce motion */
       * {
@@ -2063,7 +2141,7 @@ const sensoryOverloadManager = (function() {
     if (enable) {
       applySensoryAdjustments();
     } else {
-      const style = document.getElementById('sensory-overload-style');
+      const style = document.getElementById("sensory-overload-style");
       if (style) {
         style.remove();
       }
@@ -2071,16 +2149,16 @@ const sensoryOverloadManager = (function() {
   }
 
   return {
-    applyProfile: applySensoryOverload
+    applyProfile: applySensoryOverload,
   };
 })();
 
-const focusEnhancementManager = (function() {
+const focusEnhancementManager = (function () {
   let focusEnabled = false;
 
   function applyFocusEnhancement() {
-    const style = document.createElement('style');
-    style.id = 'focus-enhancement-style';
+    const style = document.createElement("style");
+    style.id = "focus-enhancement-style";
     style.textContent = `
       /* Dim non-essential content */
       body > *:not(:hover) {
@@ -2109,7 +2187,7 @@ const focusEnhancementManager = (function() {
     if (enable) {
       applyFocusEnhancement();
     } else {
-      const style = document.getElementById('focus-enhancement-style');
+      const style = document.getElementById("focus-enhancement-style");
       if (style) {
         style.remove();
       }
@@ -2117,12 +2195,12 @@ const focusEnhancementManager = (function() {
   }
 
   return {
-    applyProfile: applyFocusEnhancementProfile
+    applyProfile: applyFocusEnhancementProfile,
   };
 })();
 
 // Add keyboard navigation manager
-const keyboardNavigationManager = (function() {
+const keyboardNavigationManager = (function () {
   let keyboardNavEnabled = false;
   let lastFocusedElement = null;
   let lastAction = null;
@@ -2132,17 +2210,19 @@ const keyboardNavigationManager = (function() {
   let speechQueue = [];
   let isSpeaking = false;
   let descriptionTimeout = null;
-  let lastSpokenText = '';
+  let lastSpokenText = "";
 
-  function showFeedback(message, type = 'info') {
-    const feedback = document.createElement('div');
-    feedback.className = 'ac-voice-feedback';
+  function showFeedback(message, type = "info") {
+    const feedback = document.createElement("div");
+    feedback.className = "ac-voice-feedback";
     feedback.style.cssText = `
       position: fixed;
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      background: ${type === 'info' ? '#4169E1' : '#dc3545'};
+      background: ${
+        type === "info" ? "#0D6EFD" : "#dc3545"
+      };  // Changed from #4169E1 to #0D6EFD for info type
       color: white;
       padding: 12px 24px;
       border-radius: 25px;
@@ -2155,10 +2235,10 @@ const keyboardNavigationManager = (function() {
     `;
     feedback.textContent = message;
     document.body.appendChild(feedback);
-    
+
     // Remove feedback after delay
     setTimeout(() => {
-      feedback.style.animation = 'slideDown 0.3s ease';
+      feedback.style.animation = "slideDown 0.3s ease";
       setTimeout(() => feedback.remove(), 5000);
     }, 5000);
   }
@@ -2172,9 +2252,9 @@ const keyboardNavigationManager = (function() {
 
     // Stop any ongoing speech
     window.speechSynthesis.cancel();
-    
+
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
+    utterance.lang = "en-US";
     utterance.rate = 0.9;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
@@ -2189,7 +2269,7 @@ const keyboardNavigationManager = (function() {
     };
 
     utterance.onerror = (event) => {
-      console.error('Speech synthesis error:', event);
+      console.error("Speech synthesis error:", event);
       isSpeaking = false;
       if (speechQueue.length > 0) {
         const nextText = speechQueue.shift();
@@ -2200,9 +2280,9 @@ const keyboardNavigationManager = (function() {
     try {
       isSpeaking = true;
       window.speechSynthesis.speak(utterance);
-      showFeedback(text, 'info');
+      showFeedback(text, "info");
     } catch (e) {
-      console.error('Speech synthesis error:', e);
+      console.error("Speech synthesis error:", e);
       isSpeaking = false;
     }
   }
@@ -2228,9 +2308,10 @@ const keyboardNavigationManager = (function() {
     }
 
     // Skip AI analysis for simple elements
-    if (element.tagName === 'BUTTON' || element.tagName === 'A') {
+    if (element.tagName === "BUTTON" || element.tagName === "A") {
       const text = element.textContent.trim();
-      if (text.length < 30) { // Skip AI for short text
+      if (text.length < 30) {
+        // Skip AI for short text
         return;
       }
     }
@@ -2240,58 +2321,63 @@ const keyboardNavigationManager = (function() {
       const context = {
         elementType: element.tagName.toLowerCase(),
         elementText: element.textContent.trim(),
-        elementRole: element.getAttribute('role'),
-        elementAriaLabel: element.getAttribute('aria-label'),
+        elementRole: element.getAttribute("role"),
+        elementAriaLabel: element.getAttribute("aria-label"),
         parentElement: element.parentElement?.tagName.toLowerCase(),
         surroundingText: element.parentElement?.textContent.trim(),
-        action: action
+        action: action,
       };
 
       // Call OpenAI API for action analysis
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer '        },
-        body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
-          messages: [
-            {
-              role: 'system',
-              content: 'You are an accessibility assistant helping blind users understand their actions on a webpage. Provide very brief, clear descriptions under 50 characters.'
-            },
-            {
-              role: 'user',
-              content: `Analyze this user action and provide a very brief description (max 50 characters):
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer ",
+          },
+          body: JSON.stringify({
+            model: "gpt-3.5-turbo",
+            messages: [
+              {
+                role: "system",
+                content:
+                  "You are an accessibility assistant helping blind users understand their actions on a webpage. Provide very brief, clear descriptions under 50 characters.",
+              },
+              {
+                role: "user",
+                content: `Analyze this user action and provide a very brief description (max 50 characters):
                 Element Type: ${context.elementType}
                 Element Text: ${context.elementText}
                 Element Role: ${context.elementRole}
                 Aria Label: ${context.elementAriaLabel}
                 Parent Element: ${context.parentElement}
                 Surrounding Text: ${context.surroundingText}
-                Action: ${context.action}`
-            }
-          ],
-          max_tokens: 50
-        })
-      });
+                Action: ${context.action}`,
+              },
+            ],
+            max_tokens: 50,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);
       }
 
       const data = await response.json();
-      
+
       if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-        throw new Error('Invalid API response format');
+        throw new Error("Invalid API response format");
       }
 
       // Limit description to 50 characters
       let description = data.choices[0].message.content;
       if (description.length > 50) {
-        description = description.substring(0, 47) + '...';
+        description = description.substring(0, 47) + "...";
       }
-      
+
       // Update action history and timestamp
       actionHistory.push(action);
       if (actionHistory.length > 5) actionHistory.shift();
@@ -2301,100 +2387,103 @@ const keyboardNavigationManager = (function() {
       // Queue the description for speech
       queueSpeech(description);
     } catch (error) {
-      console.error('Error analyzing user action:', error);
+      console.error("Error analyzing user action:", error);
       const errorMessage = `Error analyzing content: ${error.message}`;
       queueSpeech(errorMessage);
-      showFeedback(errorMessage, 'error');
+      showFeedback(errorMessage, "error");
     }
   }
 
   async function describeImage(imageElement) {
     try {
       // Create a canvas to capture the image
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
       // Set canvas size to match image
       canvas.width = imageElement.naturalWidth;
       canvas.height = imageElement.naturalHeight;
-      
+
       // Draw the image on canvas
       ctx.drawImage(imageElement, 0, 0);
-      
+
       // Convert canvas to base64
-      const base64Image = canvas.toDataURL('image/jpeg').split(',')[1];
+      const base64Image = canvas.toDataURL("image/jpeg").split(",")[1];
 
       // Call OpenAI API for image description
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer'
-        },
-        body: JSON.stringify({
-          model: 'gpt-4-vision-preview',
-          messages: [
-            {
-              role: 'user',
-              content: [
-                {
-                  type: 'text',
-                  text: 'Describe this image in 50 characters or less.'
-                },
-                {
-                  type: 'image_url',
-                  image_url: {
-                    url: `data:image/jpeg;base64,${base64Image}`
-                  }
-                }
-              ]
-            }
-          ],
-          max_tokens: 50
-        })
-      });
+      const response = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer",
+          },
+          body: JSON.stringify({
+            model: "gpt-4-vision-preview",
+            messages: [
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "text",
+                    text: "Describe this image in 50 characters or less.",
+                  },
+                  {
+                    type: "image_url",
+                    image_url: {
+                      url: `data:image/jpeg;base64,${base64Image}`,
+                    },
+                  },
+                ],
+              },
+            ],
+            max_tokens: 50,
+          }),
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);
       }
 
       const data = await response.json();
-      
+
       if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-        throw new Error('Invalid API response format');
+        throw new Error("Invalid API response format");
       }
 
       // Limit description to 50 characters
       let description = data.choices[0].message.content;
       if (description.length > 50) {
-        description = description.substring(0, 47) + '...';
+        description = description.substring(0, 47) + "...";
       }
 
       return description;
     } catch (error) {
-      console.error('Error describing image:', error);
+      console.error("Error describing image:", error);
       const errorMessage = `Error describing image: ${error.message}`;
       queueSpeech(errorMessage);
-      showFeedback(errorMessage, 'error');
-      return imageElement.alt || 'Image without description';
+      showFeedback(errorMessage, "error");
+      return imageElement.alt || "Image without description";
     }
   }
 
-  async function speakElement(element, action = 'focus') {
+  async function speakElement(element, action = "focus") {
     // Clear any pending description timeout
     if (descriptionTimeout) {
       clearTimeout(descriptionTimeout);
     }
 
     // Get element description
-    let description = '';
-    
+    let description = "";
+
     // First check if the element or its children contain an image
-    const images = element.getElementsByTagName('img');
+    const images = element.getElementsByTagName("img");
     if (images.length > 0) {
       // If the element itself is an image
-      if (element.tagName === 'IMG') {
-        description = element.alt || 'Image without description';
+      if (element.tagName === "IMG") {
+        description = element.alt || "Image without description";
         queueSpeech(description);
 
         // Then get AI description after delay
@@ -2410,7 +2499,7 @@ const keyboardNavigationManager = (function() {
       else {
         // Get the first image's description
         const firstImage = images[0];
-        description = firstImage.alt || 'Image without description';
+        description = firstImage.alt || "Image without description";
         queueSpeech(description);
 
         // Then get AI description after delay
@@ -2423,62 +2512,60 @@ const keyboardNavigationManager = (function() {
         return;
       }
     }
-    
+
     // If no images found, proceed with regular element description
-    if (element.getAttribute('aria-label')) {
-      description = element.getAttribute('aria-label');
-    }
-    else if (element.textContent) {
+    if (element.getAttribute("aria-label")) {
+      description = element.getAttribute("aria-label");
+    } else if (element.textContent) {
       description = element.textContent.trim();
-    }
-    else {
-      const role = element.getAttribute('role');
+    } else {
+      const role = element.getAttribute("role");
       if (role) {
-        description = role.replace(/-/g, ' ');
+        description = role.replace(/-/g, " ");
       } else {
         // Convert technical tag names to user-friendly terms
         const friendlyTypes = {
-          'button': 'button',
-          'a': 'link',
-          'input': 'input field',
-          'select': 'dropdown menu',
-          'textarea': 'text area',
-          'h1': 'heading',
-          'h2': 'subheading',
-          'h3': 'section heading',
-          'p': 'paragraph',
-          'div': 'section',
-          'span': 'text',
-          'ul': 'list',
-          'ol': 'numbered list',
-          'li': 'list item',
-          'table': 'table',
-          'tr': 'table row',
-          'td': 'table cell',
-          'th': 'table header',
-          'form': 'form',
-          'label': 'label',
-          'nav': 'navigation',
-          'header': 'header',
-          'footer': 'footer',
-          'main': 'main content',
-          'article': 'article',
-          'section': 'section',
-          'aside': 'sidebar'
+          button: "button",
+          a: "link",
+          input: "input field",
+          select: "dropdown menu",
+          textarea: "text area",
+          h1: "heading",
+          h2: "subheading",
+          h3: "section heading",
+          p: "paragraph",
+          div: "section",
+          span: "text",
+          ul: "list",
+          ol: "numbered list",
+          li: "list item",
+          table: "table",
+          tr: "table row",
+          td: "table cell",
+          th: "table header",
+          form: "form",
+          label: "label",
+          nav: "navigation",
+          header: "header",
+          footer: "footer",
+          main: "main content",
+          article: "article",
+          section: "section",
+          aside: "sidebar",
         };
-        description = friendlyTypes[element.tagName.toLowerCase()] || 'element';
+        description = friendlyTypes[element.tagName.toLowerCase()] || "element";
       }
     }
 
     // Clean up the description
     description = description
-      .replace(/[<>]/g, '') // Remove any HTML tags
-      .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+      .replace(/[<>]/g, "") // Remove any HTML tags
+      .replace(/\s+/g, " ") // Replace multiple spaces with single space
       .trim();
 
     // Limit description to 50 characters
     if (description.length > 50) {
-      description = description.substring(0, 47) + '...';
+      description = description.substring(0, 47) + "...";
     }
 
     // Queue the description for speech
@@ -2491,10 +2578,10 @@ const keyboardNavigationManager = (function() {
     // Wait for the focus to change
     setTimeout(() => {
       const focusedElement = document.activeElement;
-      
+
       // Only speak if the focused element has changed
       if (focusedElement !== lastFocusedElement) {
-        speakElement(focusedElement, 'tab navigation');
+        speakElement(focusedElement, "tab navigation");
         lastFocusedElement = focusedElement;
       }
     }, 50);
@@ -2502,57 +2589,64 @@ const keyboardNavigationManager = (function() {
 
   function handleClick(e) {
     if (!keyboardNavEnabled) return;
-    
+
     // First describe the clicked element
-    speakElement(e.target, 'click');
-    
+    speakElement(e.target, "click");
+
     // Check if the click will cause navigation
-    const target = e.target.closest('a');
+    const target = e.target.closest("a");
     if (target) {
       // Add a delay to wait for the new page to load
       setTimeout(async () => {
         try {
-          showFeedback('Analyzing new page content...', 'info');
-          
+          showFeedback("Analyzing new page content...", "info");
+
           // Wait for the page to be fully loaded
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
           // Get the main content element
-          const mainContent = document.querySelector('main') || 
-                            document.querySelector('[role="main"]') || 
-                            document.querySelector('#main-content') || 
-                            document.body;
-          
+          const mainContent =
+            document.querySelector("main") ||
+            document.querySelector('[role="main"]') ||
+            document.querySelector("#main-content") ||
+            document.body;
+
           // Get visible text content
           const textContent = mainContent.innerText
-            .split('\n')
-            .map(line => line.trim())
-            .filter(line => line.length > 0)
-            .join('\n')
+            .split("\n")
+            .map((line) => line.trim())
+            .filter((line) => line.length > 0)
+            .join("\n")
             .substring(0, 1000); // Limit to first 1000 characters
 
           // Call OpenAI API for description
-          const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer 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'
-            },
-            body: JSON.stringify({
-              model: 'gpt-3.5-turbo',
-              messages: [{
-                role: 'user',
-                content: `Provide a brief, clear description of what this webpage is about in 50 words or less. Focus on the main purpose and content: ${textContent}`
-              }]
-            })
-          });
-          
+          const response = await fetch(
+            "https://api.openai.com/v1/chat/completions",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization:
+                  "Bearer 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",
+              },
+              body: JSON.stringify({
+                model: "gpt-3.5-turbo",
+                messages: [
+                  {
+                    role: "user",
+                    content: `Provide a brief, clear description of what this webpage is about in 50 words or less. Focus on the main purpose and content: ${textContent}`,
+                  },
+                ],
+              }),
+            }
+          );
+
           const data = await response.json();
           const description = data.choices[0].message.content;
-          showFeedback(`New page description: ${description}`, 'info');
+          showFeedback(`New page description: ${description}`, "info");
         } catch (error) {
-          console.error('Error analyzing new page:', error);
-          showFeedback('Error analyzing new page content', 'error');
+          console.error("Error analyzing new page:", error);
+          showFeedback("Error analyzing new page content", "error");
         }
       }, 2000); // Wait 2 seconds after click to ensure the new page has loaded
     }
@@ -2560,27 +2654,40 @@ const keyboardNavigationManager = (function() {
 
   function handleKeyPress(e) {
     if (!keyboardNavEnabled) return;
-    
+
     // Only analyze if it's not a navigation key
-    if (!['Tab', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', 'Space'].includes(e.key)) {
+    if (
+      ![
+        "Tab",
+        "ArrowUp",
+        "ArrowDown",
+        "ArrowLeft",
+        "ArrowRight",
+        "Enter",
+        "Space",
+      ].includes(e.key)
+    ) {
       speakElement(document.activeElement, `typing: ${e.key}`);
     }
   }
 
   function handleScroll(e) {
     if (!keyboardNavEnabled) return;
-    
-    const direction = e.deltaY > 0 ? 'down' : 'up';
+
+    const direction = e.deltaY > 0 ? "down" : "up";
     const scrollAmount = Math.abs(e.deltaY);
-    
+
     // Get the element in view
     const elementsInView = document.elementsFromPoint(
       window.innerWidth / 2,
       window.innerHeight / 2
     );
-    
+
     if (elementsInView.length > 0) {
-      speakElement(elementsInView[0], `scrolling ${direction} ${Math.round(scrollAmount)} pixels`);
+      speakElement(
+        elementsInView[0],
+        `scrolling ${direction} ${Math.round(scrollAmount)} pixels`
+      );
     }
   }
 
@@ -2588,14 +2695,14 @@ const keyboardNavigationManager = (function() {
     keyboardNavEnabled = enable;
     if (enable) {
       // Add event listeners
-      document.addEventListener('keydown', handleTabNavigation);
-      document.addEventListener('keydown', handleKeyPress);
-      document.addEventListener('click', handleClick);
-      document.addEventListener('wheel', handleScroll);
-      
+      document.addEventListener("keydown", handleTabNavigation);
+      document.addEventListener("keydown", handleKeyPress);
+      document.addEventListener("click", handleClick);
+      document.addEventListener("wheel", handleScroll);
+
       // Add focus styles
-      const style = document.createElement('style');
-      style.id = 'keyboard-navigation-style';
+      const style = document.createElement("style");
+      style.id = "keyboard-navigation-style";
       style.textContent = `
         *:focus {
           outline: 3px solid #4169E1 !important;
@@ -2621,35 +2728,38 @@ const keyboardNavigationManager = (function() {
       document.head.appendChild(style);
 
       // Add skip link if not exists
-      if (!document.querySelector('.ac-skip-link')) {
-        const skipLink = document.createElement('a');
-        skipLink.href = '#main-content';
-        skipLink.className = 'ac-skip-link';
-        skipLink.textContent = 'Skip to main content';
+      if (!document.querySelector(".ac-skip-link")) {
+        const skipLink = document.createElement("a");
+        skipLink.href = "#main-content";
+        skipLink.className = "ac-skip-link";
+        skipLink.textContent = "Skip to main content";
         document.body.insertBefore(skipLink, document.body.firstChild);
       }
 
       // Show initial feedback
-      showFeedback('AI-powered navigation assistance activated. Your actions will be analyzed and described.', 'info');
+      showFeedback(
+        "AI-powered navigation assistance activated. Your actions will be analyzed and described.",
+        "info"
+      );
     } else {
       // Remove event listeners
-      document.removeEventListener('keydown', handleTabNavigation);
-      document.removeEventListener('keydown', handleKeyPress);
-      document.removeEventListener('click', handleClick);
-      document.removeEventListener('wheel', handleScroll);
-      
+      document.removeEventListener("keydown", handleTabNavigation);
+      document.removeEventListener("keydown", handleKeyPress);
+      document.removeEventListener("click", handleClick);
+      document.removeEventListener("wheel", handleScroll);
+
       // Remove styles
-      const style = document.getElementById('keyboard-navigation-style');
+      const style = document.getElementById("keyboard-navigation-style");
       if (style) {
         style.remove();
       }
-      
+
       // Remove skip link
-      const skipLink = document.querySelector('.ac-skip-link');
+      const skipLink = document.querySelector(".ac-skip-link");
       if (skipLink) {
         skipLink.remove();
       }
-      
+
       // Reset state
       lastFocusedElement = null;
       lastAction = null;
@@ -2658,27 +2768,31 @@ const keyboardNavigationManager = (function() {
   }
 
   return {
-    applyProfile: applyKeyboardNavigation
+    applyProfile: applyKeyboardNavigation,
   };
 })();
 
 // Enable voice control by default
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   // Find and activate the keyboard navigation toggle
   const keyboardToggle = widget.querySelector('[data-profile="keyboard"]');
   if (keyboardToggle) {
-    keyboardToggle.classList.add('active');
+    keyboardToggle.classList.add("active");
     keyboardNavigationManager.applyProfile(true);
   }
 });
 
 // Add voice control to widget elements
-widget.addEventListener('click', (e) => {
+widget.addEventListener("click", (e) => {
   const target = e.target;
-  if (target.classList.contains('ac-action-btn') || target.classList.contains('ac-category-btn') || target.classList.contains('ac-toggle')) {
+  if (
+    target.classList.contains("ac-action-btn") ||
+    target.classList.contains("ac-category-btn") ||
+    target.classList.contains("ac-toggle")
+  ) {
     const text = target.textContent.trim();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
+    utterance.lang = "en-US";
     utterance.rate = 0.9;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
@@ -2686,17 +2800,15 @@ widget.addEventListener('click', (e) => {
   }
 });
 
-
 function applyColorBlindFilter(type) {
   const filter = colorBlindFilters[type] || "none";
   document.body.style.filter = filter;
 }
-document.querySelectorAll(".cb-sim-btn").forEach(btn => {
+document.querySelectorAll(".cb-sim-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
     applyColorBlindFilter(btn.dataset.filter);
   });
 });
-
 
 document.body.addEventListener("click", (e) => {
   const item = e.target.closest(".cb-palette-item");
@@ -2707,6 +2819,74 @@ document.body.addEventListener("click", (e) => {
   }
 });
 
+// Add event listener for disease categorization
+document
+  .querySelector(".ac-search-box input")
+  .addEventListener("keydown", async (e) => {
+    if (e.key === "Enter") {
+      const disease = e.target.value.trim();
+      if (disease.length > 2) {
+        // Check if we already have this disease categorized
+        const storedDiseases = JSON.parse(
+          localStorage.getItem("diseases") || "{}"
+        );
+        if (storedDiseases[disease]) {
+          // Use stored category
+          const category = storedDiseases[disease];
+          console.log(`Using stored category for ${disease}: ${category}`);
+          // Select category and enable toggles
+          const categoryButton = widget.querySelector(
+            `[data-category="${category}"]`
+          );
+          if (categoryButton) {
+            categoryButton.click();
+            const toggles = widget.querySelectorAll(".ac-toggle");
+            toggles.forEach((toggle) => {
+              const profileItem = toggle.closest(".ac-profile-item");
+              if (profileItem && profileItem.dataset.category === category) {
+                if (!toggle.classList.contains("active")) {
+                  toggle.click();
+                }
+              }
+            });
+          }
+        } else {
+          // Categorize using API
+          await categorizeDisease(disease);
+        }
+      }
+    }
+  });
 
+// Add input event listener for "blind" keyword
+document
+  .querySelector(".ac-search-box input")
+  .addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      const input = e.target;
+      const value = input.value.trim().toLowerCase();
 
+      if (value === "blind") {
+        // Select sensory category
+        const sensoryButton = widget.querySelector('[data-category="sensory"]');
+        if (sensoryButton) {
+          sensoryButton.click();
+        }
 
+        // Enable all sensory toggles except Vision Impaired Profile
+        const toggles = widget.querySelectorAll(".ac-toggle");
+        toggles.forEach((toggle) => {
+          const profileItem = toggle.closest(".ac-profile-item");
+          if (profileItem && profileItem.dataset.category === "sensory") {
+            const title = profileItem.querySelector("h3").textContent;
+            if (
+              title !== "Vision Impaired Profile" &&
+              !toggle.classList.contains("active")
+            ) {
+              toggle.click();
+            }
+          }
+        });
+      }
+    }
+  });
