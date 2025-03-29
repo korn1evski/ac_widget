@@ -10,3 +10,27 @@
 #accessibility-widget-root * {
   all: revert;
 }
+
+.cb-palette-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  background: #f8f9fa;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cb-palette-item:hover {
+  background: #e9ecef;
+}
+
+.cb-color-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  flex-shrink: 0;
+}

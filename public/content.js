@@ -74,6 +74,18 @@ widget.innerHTML = `
         <button class="ac-category-btn" data-category="neurological">Neurological</button>
       </div>
     </div>
+
+    <div id="color-blindness-options" style="display: none; margin-top: 20px;">
+<h4>Adapt Website for Color Blind Users:</h4>
+  <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <button class="cb-sim-btn" data-filter="normal">Normal</button>
+    <button class="cb-sim-btn" data-filter="protanopia">Red-Weak (Protan)</button>
+    <button class="cb-sim-btn" data-filter="deuteranopia">Green-Weak (Deutan)</button>
+    <button class="cb-sim-btn" data-filter="tritanopia">Blue-Weak (Tritan)</button>
+
+  </div>
+</div>
+
     
     <h3 style="margin: 0 0 20px; font-size: 18px;">Choose the right accessibility profile for you</h3>
     
@@ -230,7 +242,15 @@ const categories = {
       description: "Optimized for screen readers",
       icon: "🔊",
       category: "sensory"
+    },
+    {
+      id: "colorblind",
+      title: "Color Blindness Profile",
+      description: "Enhance color visibility for different color blindness types",
+      icon: "🎨",
+      category: "sensory"
     }
+    
   ],
   motor: [
     {
@@ -353,7 +373,7 @@ categoryButtons.forEach(button => {
 const profileList = widget.querySelector(".ac-profile-list");
 profiles.forEach((profile) => {
   const item = document.createElement("div");
-  item.className = "ac-profile-item";
+  item.className = "ac-profile-item visible";
   item.dataset.category = profile.category;
   item.innerHTML = `
     <div class="ac-toggle" data-profile="${profile.id}">
@@ -365,6 +385,54 @@ profiles.forEach((profile) => {
     </div>
     <div class="ac-profile-icon">${profile.icon}</div>
   `;
+  if (profile.id === "colorblind") {
+    item.innerHTML = `
+      <div class="ac-toggle" data-profile="${profile.id}">
+        <div class="ac-toggle-button"></div>
+      </div>
+      <div style="flex: 1">
+        <h3>${profile.title}</h3>
+        <p>${profile.description}</p>
+<div class="cb-filter-palette" style="display: none; margin-top: 12px; display: flex; flex-direction: column; gap: 10px;">
+  <p style="margin: 0 0 8px; font-size: 14px; color: #6c757d;">Choose a palette adapted to your color vision:</p>
+
+  <div class="cb-palette-item" data-filter="normal" title="Normal Vision (Full Color)">
+    <div class="cb-color-circle" style="background-color: #4caf50;"></div>
+    <div>
+      <strong>Normal Vision</strong>
+      <div style="font-size: 12px; color: #6c757d;">Standard color experience</div>
+    </div>
+  </div>
+
+  <div class="cb-palette-item" data-filter="protanopia" title="Protanopia (Red-Blindness)">
+    <div class="cb-color-circle" style="background-color: #ff9999;"></div>
+    <div>
+      <strong>Protanopia</strong>
+      <div style="font-size: 12px; color: #6c757d;">Difficulty seeing reds</div>
+    </div>
+  </div>
+
+  <div class="cb-palette-item" data-filter="deuteranopia" title="Deuteranopia (Green-Blindness)">
+    <div class="cb-color-circle" style="background-color: #ffff99;"></div>
+    <div>
+      <strong>Deuteranopia</strong>
+      <div style="font-size: 12px; color: #6c757d;">Difficulty seeing greens</div>
+    </div>
+  </div>
+
+  <div class="cb-palette-item" data-filter="tritanopia" title="Tritanopia (Blue-Blindness)">
+    <div class="cb-color-circle" style="background-color: #99ccff;"></div>
+    <div>
+      <strong>Tritanopia</strong>
+      <div style="font-size: 12px; color: #6c757d;">Difficulty seeing blues</div>
+    </div>
+  </div>
+</div>
+
+      <div class="ac-profile-icon">${profile.icon}</div>
+    `;
+  }
+  
   profileList.appendChild(item);
 });
 
@@ -590,6 +658,16 @@ widget.querySelectorAll(".ac-toggle").forEach((toggle) => {
       sensoryOverloadManager.applyProfile(toggle.classList.contains("active"));
     } else if (profileId === "focus") {
       focusEnhancementManager.applyProfile(toggle.classList.contains("active"));
+    } else if (profileId === "colorblind") {
+      const enabled = toggle.classList.contains("active");
+      const palette = toggle.closest(".ac-profile-item").querySelector(".cb-filter-palette");
+      if (palette) {
+        palette.style.display = enabled ? "flex" : "none";
+      }
+    
+      if (!enabled) {
+        applyColorBlindFilter("normal");
+      }
     }
   });
 });
@@ -658,6 +736,33 @@ document.body.appendChild(focusLine);
 
 document.body.appendChild(button);
 document.body.appendChild(widget);
+
+const colorBlindStyles = document.createElement("style");
+colorBlindStyles.id = "color-blind-style";
+document.head.appendChild(colorBlindStyles);
+
+const colorBlindFilters = {
+  normal: "none",
+  protanopia: "url('#protanopia')",
+  deuteranopia: "url('#deuteranopia')",
+  tritanopia: "url('#tritanopia')"
+};
+
+// SVG filter definitions (simulate types of color blindness)
+const svgFilters = `
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="display:none">
+  <filter id="protanopia">
+    <feColorMatrix in="SourceGraphic" type="matrix" values="0.567,0.433,0,0,0 0.558,0.442,0,0,0 0,0.242,0.758,0,0 0,0,0,1,0"/>
+  </filter>
+  <filter id="deuteranopia">
+    <feColorMatrix in="SourceGraphic" type="matrix" values="0.625,0.375,0,0,0 0.7,0.3,0,0,0 0,0.3,0.7,0,0 0,0,0,1,0"/>
+  </filter>
+  <filter id="tritanopia">
+    <feColorMatrix in="SourceGraphic" type="matrix" values="0.95,0.05,0,0,0 0,0.433,0.567,0,0 0,0.475,0.525,0,0 0,0,0,1,0"/>
+  </filter>
+</svg>
+`;
+document.body.insertAdjacentHTML('beforeend', svgFilters);
 
 // Enhanced Hearing Impaired Manager
 const hearingImpairedManager = (function() {
@@ -2498,3 +2603,28 @@ widget.addEventListener('click', (e) => {
     window.speechSynthesis.speak(utterance);
   }
 });
+
+
+function applyColorBlindFilter(type) {
+  const filter = colorBlindFilters[type] || "none";
+  document.body.style.filter = filter;
+}
+document.querySelectorAll(".cb-sim-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    applyColorBlindFilter(btn.dataset.filter);
+  });
+});
+
+
+document.body.addEventListener("click", (e) => {
+  const item = e.target.closest(".cb-palette-item");
+  if (item) {
+    e.preventDefault(); // Only prevent default for palette items
+    const type = item.dataset.filter;
+    applyColorBlindFilter(type);
+  }
+});
+
+
+
+

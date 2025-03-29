@@ -30,35 +30,42 @@ button.style.cssText = `
 const widget = document.createElement("div");
 widget.style.cssText = `
   position: fixed;
-  top: 0;
-  right: -420px;
-  height: 100vh;
-  width: 400px;
+  top: 50%;
+  right: -520px;
+  transform: translateY(-50%);
+  height: 90vh;
+  width: 500px;
   background: white;
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: -2px 0 20px rgba(0, 0, 0, 0.15);
   transition: right 0.3s ease;
   z-index: 10001;
   overflow-y: auto;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  border-radius: 20px 0 0 20px;
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
 `;
 
 // Add the widget content
 widget.innerHTML = `
-  <div style="background: #4169E1; color: white; padding: 20px;">
+  <div style="background: #0D6EFD; color: white; padding: 20px;">
     <h2 style="margin: 0; font-size: 24px;">Accessibility Adjustments</h2>
-    <div style="display: flex; gap: 10px; margin-top: 15px;">
-      <button class="ac-action-btn">↺ Reset Settings</button>
-      <button class="ac-action-btn">📢 Statement</button>
-      <button class="ac-action-btn" id="ac-close-btn">✕ Close</button>
+    <div style="display: flex; gap: 8px; margin-top: 15px;">
+      <button class="ac-action-btn" style="font-size: 12px; padding: 4px 12px;">↺ Reset Settings</button>
+      <button class="ac-action-btn" style="font-size: 12px; padding: 4px 12px;">📄 Statement</button>
+      <button class="ac-action-btn" id="ac-close-btn" style="font-size: 12px; padding: 4px 12px;">✕ Hide Interface</button>
     </div>
   </div>
   
   <div style="padding: 20px;">
-    <input type="text" placeholder="Unclear content? Search in dictionary..." 
-           style="width: 100%; padding: 12px; border-radius: 25px; border: 1px solid #e0e0e0; margin-bottom: 20px;">
-    
+    <div class="ac-search-box">
+      <input type="text" placeholder="Unclear content? Search in dictionary..." 
+             style="width: 100%; padding: 12px 20px; border-radius: 25px; border: 1px solid #e0e0e0; margin-bottom: 20px; background: #f8f9fa;">
+      <span style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #6c757d;">▼</span>
+    </div>
+
     <div style="margin-bottom: 20px;">
-      <h3 style="margin: 0 0 10px;">Filter by Category</h3>
+      <h3 style="margin: 0 0 15px; font-size: 16px; color: #6c757d;">Filter by Category</h3>
       <div class="ac-category-filters" style="display: flex; gap: 10px; flex-wrap: wrap;">
         <button class="ac-category-btn active" data-category="all">All</button>
         <button class="ac-category-btn" data-category="sensory">Sensory</button>
@@ -67,228 +74,146 @@ widget.innerHTML = `
         <button class="ac-category-btn" data-category="neurological">Neurological</button>
       </div>
     </div>
+
+    <div id="color-blindness-options" style="display: none; margin-top: 20px;">
+<h4>Adapt Website for Color Blind Users:</h4>
+  <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+    <button class="cb-sim-btn" data-filter="normal">Normal</button>
+    <button class="cb-sim-btn" data-filter="protanopia">Red-Weak (Protan)</button>
+    <button class="cb-sim-btn" data-filter="deuteranopia">Green-Weak (Deutan)</button>
+    <button class="cb-sim-btn" data-filter="tritanopia">Blue-Weak (Tritan)</button>
+
+  </div>
+</div>
+
     
-    <h3 style="margin: 0 0 20px;">Choose the right accessibility profile for you</h3>
+    <h3 style="margin: 0 0 20px; font-size: 18px;">Choose the right accessibility profile for you</h3>
     
     <div class="ac-profile-list"></div>
   </div>
 `;
 
-// Add styles for action buttons
+// Add styles for action buttons and other elements
 const style = document.createElement("style");
 style.textContent = `
   .ac-action-btn {
-    background: white;
-    border: none;
-    border-radius: 25px;
-    padding: 8px 20px;
-    color: #4169E1;
+    background: transparent;
+    border: 1px solid white;
+    border-radius: 15px;
+    color: white;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
   }
 
   .ac-action-btn:hover {
-    background: #f8f9fa;
-    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.1);
   }
 
-  .ac-action-btn:active {
-    transform: translateY(0);
+  .ac-search-box {
+    position: relative;
+    margin-bottom: 30px;
+  }
+  
+  .ac-category-btn {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 25px;
+    padding: 8px 16px;
+    color: #6c757d;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .ac-category-btn:hover {
+    border-color: #0D6EFD;
+    color: #0D6EFD;
+  }
+
+  .ac-category-btn.active {
+    background: #0D6EFD;
+    color: white;
+    border-color: #0D6EFD;
   }
   
   .ac-profile-item {
     display: flex;
     align-items: center;
-    padding: 15px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    transition: all 0.2s;
-  }
-
-  .ac-profile-item:hover {
-    background: #e9ecef;
-    transform: translateX(5px);
-  }
-  
-  .ac-toggle {
-    width: 100px;
-    height: 36px;
-    background: #e9ecef;
-    border-radius: 18px;
-    position: relative;
-    cursor: pointer;
-    margin-right: 15px;
-    transition: background-color 0.2s;
-  }
-
-  .ac-toggle:hover {
-    background: #dee2e6;
-  }
-  
-  .ac-toggle-button {
-    width: 28px;
-    height: 28px;
+    padding: 20px;
     background: white;
-    border-radius: 50%;
-    position: absolute;
-    top: 4px;
-    left: 4px;
-    transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .ac-toggle.active {
-    background: #4169E1;
-  }
-  
-  .ac-toggle.active .ac-toggle-button {
-    left: 68px;
-    background: white;
-  }
-
-  /* Category filter styles */
-  .ac-category-filters {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-  }
-
-  .ac-category-btn {
-    background: #f8f9fa;
     border: 1px solid #dee2e6;
-    border-radius: 20px;
-    padding: 8px 16px;
-    color: #495057;
-    font-size: 14px;
-    cursor: pointer;
+    border-radius: 8px;
+    margin-bottom: 15px;
     transition: all 0.2s;
-  }
-  
-  .ac-category-btn:hover {
-    background: #e9ecef;
-    transform: translateY(-1px);
-  }
-  
-  .ac-category-btn.active {
-    background: #4169E1;
-    color: white;
-    border-color: #4169E1;
-  }
-
-  /* Profile visibility */
-  .ac-profile-item {
     display: none;
     opacity: 0;
     transform: translateX(20px);
-    transition: all 0.3s ease;
   }
-  
+
   .ac-profile-item.visible {
     display: flex;
     opacity: 1;
     transform: translateX(0);
   }
 
-  /* Widget panel styles */
-  #accessibility-widget-root {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    pointer-events: none;
-    z-index: 10000;
+  .ac-profile-item:hover {
+    border-color: #0D6EFD;
+  }
+  
+  .ac-toggle {
+    position: relative;
+    width: 60px;
+    height: 30px;
+    background: #e9ecef;
+    border-radius: 15px;
+    margin-right: 15px;
+    cursor: pointer;
+    flex-shrink: 0;
   }
 
-  #accessibility-widget-root * {
-    pointer-events: auto;
+  .ac-toggle-button {
+    width: 26px;
+    height: 26px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .ac-toggle.active {
+    background: #0D6EFD;
+  }
+  
+  .ac-toggle.active .ac-toggle-button {
+    left: 32px;
   }
 
-  /* Focus line styles */
-  #adhd-focus-line {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: #4169E1;
-    opacity: 0;
-    pointer-events: none;
-    z-index: 99999;
-    transition: top 0.1s ease;
-    box-shadow: 0 0 10px rgba(65, 105, 225, 0.5);
+  .ac-profile-item h3 {
+    font-size: 16px;
+    margin: 0;
+    color: #212529;
   }
 
-  /* Reading guide styles */
-  #reading-guide {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background: #4169E1;
-    pointer-events: none;
-    z-index: 99999;
-    opacity: 0;
-    transition: opacity 0.3s;
-    box-shadow: 0 0 10px rgba(65, 105, 225, 0.5);
+  .ac-profile-item p {
+    font-size: 14px;
+    margin: 5px 0 0;
+    color: #6c757d;
   }
 
-  /* Visual notifications styles */
-  #visual-notifications {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 10000;
+  .ac-profile-icon {
+    margin-left: auto;
+    font-size: 20px;
+    color: #6c757d;
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  /* Seizure safe overlay styles */
-  #seizure-safe-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(240, 240, 240, 0.3);
-    pointer-events: none;
-    z-index: 9999;
-    backdrop-filter: blur(2px);
-  }
-
-  /* ADHD overlay styles */
-  #adhd-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 99998;
-    background: rgba(0, 0, 0, 0.6);
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
-    transition: clip-path 0.1s ease;
-  }
-
-  /* Visited content styles */
-  .visited-content {
-    background-color: #e3f2fd !important;
-    border-left: 4px solid #2196f3 !important;
-    padding-left: 1em !important;
-    transition: all 0.3s ease;
-  }
-
-  /* Focus enhancement styles */
-  .focus-enhanced {
-    opacity: 1 !important;
-    background-color: #fff !important;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1) !important;
-    transition: all 0.3s ease;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
   }
 `;
 
@@ -317,7 +242,15 @@ const categories = {
       description: "Optimized for screen readers",
       icon: "🔊",
       category: "sensory"
+    },
+    {
+      id: "colorblind",
+      title: "Color Blindness Profile",
+      description: "Enhance color visibility for different color blindness types",
+      icon: "🎨",
+      category: "sensory"
     }
+    
   ],
   motor: [
     {
@@ -447,11 +380,59 @@ profiles.forEach((profile) => {
       <div class="ac-toggle-button"></div>
     </div>
     <div style="flex: 1">
-      <h3 style="margin: 0; font-size: 16px;">${profile.title}</h3>
-      <p style="margin: 4px 0 0; color: #6c757d;">${profile.description}</p>
+      <h3>${profile.title}</h3>
+      <p>${profile.description}</p>
     </div>
-    <div style="margin-left: 10px; font-size: 20px;">${profile.icon}</div>
+    <div class="ac-profile-icon">${profile.icon}</div>
   `;
+  if (profile.id === "colorblind") {
+    item.innerHTML = `
+      <div class="ac-toggle" data-profile="${profile.id}">
+        <div class="ac-toggle-button"></div>
+      </div>
+      <div style="flex: 1">
+        <h3>${profile.title}</h3>
+        <p>${profile.description}</p>
+<div class="cb-filter-palette" style="display: none; margin-top: 12px; display: flex; flex-direction: column; gap: 10px;">
+  <p style="margin: 0 0 8px; font-size: 14px; color: #6c757d;">Choose a palette adapted to your color vision:</p>
+
+  <div class="cb-palette-item" data-filter="normal" title="Normal Vision (Full Color)">
+    <div class="cb-color-circle" style="background-color: #4caf50;"></div>
+    <div>
+      <strong>Normal Vision</strong>
+      <div style="font-size: 12px; color: #6c757d;">Standard color experience</div>
+    </div>
+  </div>
+
+  <div class="cb-palette-item" data-filter="protanopia" title="Protanopia (Red-Blindness)">
+    <div class="cb-color-circle" style="background-color: #ff9999;"></div>
+    <div>
+      <strong>Protanopia</strong>
+      <div style="font-size: 12px; color: #6c757d;">Difficulty seeing reds</div>
+    </div>
+  </div>
+
+  <div class="cb-palette-item" data-filter="deuteranopia" title="Deuteranopia (Green-Blindness)">
+    <div class="cb-color-circle" style="background-color: #ffff99;"></div>
+    <div>
+      <strong>Deuteranopia</strong>
+      <div style="font-size: 12px; color: #6c757d;">Difficulty seeing greens</div>
+    </div>
+  </div>
+
+  <div class="cb-palette-item" data-filter="tritanopia" title="Tritanopia (Blue-Blindness)">
+    <div class="cb-color-circle" style="background-color: #99ccff;"></div>
+    <div>
+      <strong>Tritanopia</strong>
+      <div style="font-size: 12px; color: #6c757d;">Difficulty seeing blues</div>
+    </div>
+  </div>
+</div>
+
+      <div class="ac-profile-icon">${profile.icon}</div>
+    `;
+  }
+  
   profileList.appendChild(item);
 });
 
@@ -460,7 +441,7 @@ button.addEventListener("click", () => {
 });
 
 widget.querySelector("#ac-close-btn").addEventListener("click", () => {
-  widget.style.right = "-420px";
+  widget.style.right = "-520px";
 });
 
 window.addEventListener("mousemove", (e) => {
@@ -677,6 +658,16 @@ widget.querySelectorAll(".ac-toggle").forEach((toggle) => {
       sensoryOverloadManager.applyProfile(toggle.classList.contains("active"));
     } else if (profileId === "focus") {
       focusEnhancementManager.applyProfile(toggle.classList.contains("active"));
+    } else if (profileId === "colorblind") {
+      const enabled = toggle.classList.contains("active");
+      const palette = toggle.closest(".ac-profile-item").querySelector(".cb-filter-palette");
+      if (palette) {
+        palette.style.display = enabled ? "flex" : "none";
+      }
+    
+      if (!enabled) {
+        applyColorBlindFilter("normal");
+      }
     }
   });
 });
@@ -745,6 +736,33 @@ document.body.appendChild(focusLine);
 
 document.body.appendChild(button);
 document.body.appendChild(widget);
+
+const colorBlindStyles = document.createElement("style");
+colorBlindStyles.id = "color-blind-style";
+document.head.appendChild(colorBlindStyles);
+
+const colorBlindFilters = {
+  normal: "none",
+  protanopia: "url('#protanopia')",
+  deuteranopia: "url('#deuteranopia')",
+  tritanopia: "url('#tritanopia')"
+};
+
+// SVG filter definitions (simulate types of color blindness)
+const svgFilters = `
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" style="display:none">
+  <filter id="protanopia">
+    <feColorMatrix in="SourceGraphic" type="matrix" values="0.567,0.433,0,0,0 0.558,0.442,0,0,0 0,0.242,0.758,0,0 0,0,0,1,0"/>
+  </filter>
+  <filter id="deuteranopia">
+    <feColorMatrix in="SourceGraphic" type="matrix" values="0.625,0.375,0,0,0 0.7,0.3,0,0,0 0,0.3,0.7,0,0 0,0,0,1,0"/>
+  </filter>
+  <filter id="tritanopia">
+    <feColorMatrix in="SourceGraphic" type="matrix" values="0.95,0.05,0,0,0 0,0.433,0.567,0,0 0,0.475,0.525,0,0 0,0,0,1,0"/>
+  </filter>
+</svg>
+`;
+document.body.insertAdjacentHTML('beforeend', svgFilters);
 
 // Enhanced Hearing Impaired Manager
 const hearingImpairedManager = (function() {
@@ -931,11 +949,11 @@ const motorMobilityManager = (function() {
     if ('webkitSpeechRecognition' in window) {
       recognition = new webkitSpeechRecognition();
       recognition.continuous = true;
-      recognition.interimResults = true;
+      recognition.interimResults = false; // Changed to false to prevent duplicate results
       recognition.lang = 'en-US';
       
       recognition.onresult = function(event) {
-        const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
+        const command = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
         handleVoiceCommand(command);
       };
 
@@ -983,6 +1001,12 @@ const motorMobilityManager = (function() {
   }
 
   function showVoiceFeedback(message, type = 'info') {
+    // Remove any existing feedback
+    const existingFeedback = document.querySelector('.ac-voice-feedback');
+    if (existingFeedback) {
+      existingFeedback.remove();
+    }
+
     // Create visual feedback
     const feedback = document.createElement('div');
     feedback.className = 'ac-voice-feedback';
@@ -1003,15 +1027,15 @@ const motorMobilityManager = (function() {
     feedback.textContent = message;
     document.body.appendChild(feedback);
     
+    // Stop any ongoing speech
+    window.speechSynthesis.cancel();
+    
     // Add speech synthesis
     const utterance = new SpeechSynthesisUtterance(message);
     utterance.lang = 'en-US';
     utterance.rate = 0.9;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
-    
-    // Stop any ongoing speech
-    window.speechSynthesis.cancel();
     
     // Speak the message
     try {
@@ -1126,12 +1150,6 @@ const motorMobilityManager = (function() {
       if (targetElement) {
         const text = targetElement.textContent.trim();
         showVoiceFeedback(`Reading: ${text}`, 'info');
-        // Use Web Speech API to read the text with natural pauses
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 0.9;
-        utterance.pitch = 1.0;
-        utterance.volume = 1.0;
-        window.speechSynthesis.speak(utterance);
       } else {
         showVoiceFeedback(`Could not find text: ${targetText}`, 'error');
       }
@@ -1155,7 +1173,7 @@ const motorMobilityManager = (function() {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': 'Bearer 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'
+              'Authorization': 'Bearer '
             },
             body: JSON.stringify({
               model: 'gpt-3.5-turbo',
@@ -1165,9 +1183,7 @@ const motorMobilityManager = (function() {
               }]
             })
           });
-          console.log(response);
           const data = await response.json();
-          console.log(data);
           const description = data.choices[0].message.content;
           showVoiceFeedback(`Description: ${description}`, 'info');
         } catch (error) {
@@ -1209,6 +1225,9 @@ const motorMobilityManager = (function() {
       showVoiceFeedback(`Zoomed ${direction}`, 'info');
       return;
     }
+
+    // If no command matches, show help
+    showVoiceFeedback('Command not recognized. Say "help" for available commands.', 'error');
   }
 
   function setupSimplifiedNavigation() {
@@ -2204,8 +2223,7 @@ const keyboardNavigationManager = (function() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer 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'
-        },
+          'Authorization': 'Bearer '        },
         body: JSON.stringify({
           model: 'gpt-3.5-turbo',
           messages: [
@@ -2282,7 +2300,7 @@ const keyboardNavigationManager = (function() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer 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'
+          'Authorization': 'Bearer'
         },
         body: JSON.stringify({
           model: 'gpt-4-vision-preview',
@@ -2561,3 +2579,52 @@ const keyboardNavigationManager = (function() {
     applyProfile: applyKeyboardNavigation
   };
 })();
+
+// Enable voice control by default
+document.addEventListener('DOMContentLoaded', () => {
+  // Find and activate the keyboard navigation toggle
+  const keyboardToggle = widget.querySelector('[data-profile="keyboard"]');
+  if (keyboardToggle) {
+    keyboardToggle.classList.add('active');
+    keyboardNavigationManager.applyProfile(true);
+  }
+});
+
+// Add voice control to widget elements
+widget.addEventListener('click', (e) => {
+  const target = e.target;
+  if (target.classList.contains('ac-action-btn') || target.classList.contains('ac-category-btn') || target.classList.contains('ac-toggle')) {
+    const text = target.textContent.trim();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
+    utterance.rate = 0.9;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+    window.speechSynthesis.speak(utterance);
+  }
+});
+
+
+function applyColorBlindFilter(type) {
+  const filter = colorBlindFilters[type] || "none";
+  document.body.style.filter = filter;
+}
+document.querySelectorAll(".cb-sim-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    applyColorBlindFilter(btn.dataset.filter);
+  });
+});
+
+
+document.body.addEventListener("click", (e) => {
+  const item = e.target.closest(".cb-palette-item");
+  if (item) {
+    e.preventDefault(); // Only prevent default for palette items
+    const type = item.dataset.filter;
+    applyColorBlindFilter(type);
+  }
+});
+
+
+
+
