@@ -1,11 +1,15 @@
 // Create and inject the widget container
 const container = document.createElement("div");
 container.id = "accessibility-widget-root";
+const existingChildren = Array.from(document.body.children).filter(child => 
+  child.id !== 'accessibility-widget-root' && child.tagName !== 'SCRIPT'
+);
+
 document.body.appendChild(container);
 
 // Create the floating button
 const button = document.createElement("button");
-button.innerHTML = "♿";
+button.innerHTML = '<img src="https://i.ibb.co/j9YF3rTQ/9797236.png" alt="Accessibility" style="width: 24px; height: 24px;">';
 button.style.cssText = `
   position: fixed;
   right: 20px;
@@ -13,7 +17,6 @@ button.style.cssText = `
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: #4169e1;
   border: none;
   color: white;
   font-size: 24px;
@@ -96,16 +99,14 @@ widget.innerHTML = `
     </div>
 
     <div id="color-blindness-options" style="display: none; margin-top: 20px;">
-<h4>Adapt Website for Color Blind Users:</h4>
-  <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-    <button class="cb-sim-btn" data-filter="normal">Normal</button>
-    <button class="cb-sim-btn" data-filter="protanopia">Red-Weak (Protan)</button>
-    <button class="cb-sim-btn" data-filter="deuteranopia">Green-Weak (Deutan)</button>
-    <button class="cb-sim-btn" data-filter="tritanopia">Blue-Weak (Tritan)</button>
-
-  </div>
-</div>
-
+      <h4>Adapt Website for Color Blind Users:</h4>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button class="cb-sim-btn" data-filter="normal">Normal</button>
+        <button class="cb-sim-btn" data-filter="protanopia">Red-Weak (Protan)</button>
+        <button class="cb-sim-btn" data-filter="deuteranopia">Green-Weak (Deutan)</button>
+        <button class="cb-sim-btn" data-filter="tritanopia">Blue-Weak (Tritan)</button>
+      </div>
+    </div>
     
     <h3 style="margin: 0 0 20px; font-size: 18px;">Choose the right accessibility profile for you</h3>
     
@@ -199,8 +200,8 @@ style.textContent = `
     background: white;
     border-radius: 50%;
     position: absolute;
-    top: 2px;
     left: 2px;
+    top: 2px;
     transition: all 0.2s;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
@@ -474,6 +475,16 @@ widget.querySelector("#ac-close-btn").addEventListener("click", () => {
 // Append both the button and widget to the document
 document.body.appendChild(button);
 document.body.appendChild(widget);
+const siteContentWrapper = document.createElement("div");
+siteContentWrapper.id = "site-content";
+
+existingChildren.forEach(child => siteContentWrapper.appendChild(child));
+document.body.insertBefore(siteContentWrapper, document.getElementById("accessibility-widget-root"));
+
+
+const colorBlindStyles = document.createElement("style");
+colorBlindStyles.id = "color-blind-style";
+document.head.appendChild(colorBlindStyles);
 
 const seizureSafetyManager = (function () {
   function scanForTriggers() {
@@ -520,10 +531,11 @@ const seizureSafetyManager = (function () {
     const detectedTriggers = scanForTriggers();
 
     if (active) {
-      originalStyles.body.filter = document.body.style.filter;
+      // originalStyles.body.filter = document.body.style.filter;
+      document.getElementById("site-content").style.filter = 'saturate(0.5) contrast(0.8) brightness(0.9)';
 
-      document.body.style.filter =
-        "saturate(0.5) contrast(0.8) brightness(0.9)";
+      // document.body.style.filter =
+      //   "saturate(0.5) contrast(0.8) brightness(0.9)";
 
       detectedTriggers.flashingElements.forEach((element, index) => {
         originalStyles.flashingElements[index] = {
@@ -561,7 +573,8 @@ const seizureSafetyManager = (function () {
       `;
       document.body.appendChild(overlay);
     } else {
-      document.body.style.filter = originalStyles.body.filter || "";
+      // document.body.style.filter = originalStyles.body.filter || "";
+      document.getElementById("site-content").style.filter = 'none';
 
       detectedTriggers.flashingElements.forEach((element, index) => {
         const originalStyle = originalStyles.flashingElements[index] || {};
@@ -766,9 +779,7 @@ focusLine.style.cssText = `
 `;
 document.body.appendChild(focusLine);
 
-const colorBlindStyles = document.createElement("style");
-colorBlindStyles.id = "color-blind-style";
-document.head.appendChild(colorBlindStyles);
+
 
 const colorBlindFilters = {
   normal: "none",
@@ -1329,11 +1340,8 @@ const motorMobilityManager = (function () {
       return;
     }
 
-    // If no command matches, show help
-    showVoiceFeedback(
-      'Command not recognized. Say "help" for available commands.',
-      "error"
-    );
+    // If no command matches, silently return
+    return;
   }
 
   function setupSimplifiedNavigation() {
@@ -2802,22 +2810,27 @@ widget.addEventListener("click", (e) => {
 
 function applyColorBlindFilter(type) {
   const filter = colorBlindFilters[type] || "none";
-  document.body.style.filter = filter;
-}
-document.querySelectorAll(".cb-sim-btn").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    applyColorBlindFilter(btn.dataset.filter);
+  document.getElementById("site-content").style.filter =filter;}
+  document.querySelectorAll(".cb-sim-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const isEnabled = widget.querySelector('[data-profile="colorblind"]')?.classList.contains("active");
+      if (isEnabled) {
+        applyColorBlindFilter(btn.dataset.filter);
+      }
+    });
   });
-});
 
-document.body.addEventListener("click", (e) => {
-  const item = e.target.closest(".cb-palette-item");
-  if (item) {
-    e.preventDefault(); // Only prevent default for palette items
-    const type = item.dataset.filter;
-    applyColorBlindFilter(type);
-  }
-});
+  document.body.addEventListener("click", (e) => {
+    const item = e.target.closest(".cb-palette-item");
+    if (item) {
+      const isEnabled = widget.querySelector('[data-profile="colorblind"]')?.classList.contains("active");
+      if (isEnabled) {
+        e.preventDefault();
+        const type = item.dataset.filter;
+        applyColorBlindFilter(type);
+      }
+    }
+  });
 
 // Add event listener for disease categorization
 document
