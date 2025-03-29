@@ -844,11 +844,11 @@ const motorMobilityManager = (function() {
     if ('webkitSpeechRecognition' in window) {
       recognition = new webkitSpeechRecognition();
       recognition.continuous = true;
-      recognition.interimResults = true;
+      recognition.interimResults = false; // Changed to false to prevent duplicate results
       recognition.lang = 'en-US';
       
       recognition.onresult = function(event) {
-        const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
+        const command = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
         handleVoiceCommand(command);
       };
 
@@ -896,6 +896,12 @@ const motorMobilityManager = (function() {
   }
 
   function showVoiceFeedback(message, type = 'info') {
+    // Remove any existing feedback
+    const existingFeedback = document.querySelector('.ac-voice-feedback');
+    if (existingFeedback) {
+      existingFeedback.remove();
+    }
+
     // Create visual feedback
     const feedback = document.createElement('div');
     feedback.className = 'ac-voice-feedback';
@@ -916,15 +922,15 @@ const motorMobilityManager = (function() {
     feedback.textContent = message;
     document.body.appendChild(feedback);
     
+    // Stop any ongoing speech
+    window.speechSynthesis.cancel();
+    
     // Add speech synthesis
     const utterance = new SpeechSynthesisUtterance(message);
     utterance.lang = 'en-US';
     utterance.rate = 0.9;
     utterance.pitch = 1.0;
     utterance.volume = 1.0;
-    
-    // Stop any ongoing speech
-    window.speechSynthesis.cancel();
     
     // Speak the message
     try {
@@ -1039,12 +1045,6 @@ const motorMobilityManager = (function() {
       if (targetElement) {
         const text = targetElement.textContent.trim();
         showVoiceFeedback(`Reading: ${text}`, 'info');
-        // Use Web Speech API to read the text with natural pauses
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 0.9;
-        utterance.pitch = 1.0;
-        utterance.volume = 1.0;
-        window.speechSynthesis.speak(utterance);
       } else {
         showVoiceFeedback(`Could not find text: ${targetText}`, 'error');
       }
@@ -1078,9 +1078,7 @@ const motorMobilityManager = (function() {
               }]
             })
           });
-          console.log(response);
           const data = await response.json();
-          console.log(data);
           const description = data.choices[0].message.content;
           showVoiceFeedback(`Description: ${description}`, 'info');
         } catch (error) {
@@ -1122,6 +1120,9 @@ const motorMobilityManager = (function() {
       showVoiceFeedback(`Zoomed ${direction}`, 'info');
       return;
     }
+
+    // If no command matches, show help
+    showVoiceFeedback('Command not recognized. Say "help" for available commands.', 'error');
   }
 
   function setupSimplifiedNavigation() {
